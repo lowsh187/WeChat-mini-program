@@ -1,0 +1,14 @@
+node_modules/
+miniprogram_npm/
+dist/
+coverage/
+.git/
+*.pdf
+package-lock.json
+project.config.json
+project.private.config.json
+
+# Preserve source planning documents verbatim; format maintained docs explicitly.
+*.md
+!README.md
+!docs/API_CONTRACT.md

@@ -1,0 +1,9 @@
+{
+  "desc": "PathAI sitemap",
+  "rules": [
+    {
+      "action": "disallow",
+      "page": "*"
+    }
+  ]
+}

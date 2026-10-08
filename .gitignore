@@ -1,0 +1,28 @@
+# Dependencies and generated packages
+node_modules/
+miniprogram_npm/
+
+# Build, coverage, cache and logs
+dist/
+coverage/
+.cache/
+*.log
+npm-debug.log*
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+secrets/
+
+# WeChat local-only configuration
+project.private.config.json
+
+# Editors and operating systems
+.idea/
+.vscode/settings.json
+.DS_Store
+Thumbs.db
+
+# Local API client data
+.postman/

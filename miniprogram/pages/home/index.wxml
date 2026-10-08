@@ -1,0 +1,9 @@
+<view class="page">
+  <view class="hero">
+    <text class="eyebrow">AI 职业方向导航</text>
+    <text class="title">{{title}}</text>
+    <text class="subtitle">{{subtitle}}</text>
+    <button class="primary" disabled>项目骨架已就绪</button>
+  </view>
+  <text class="notice">由 AI 辅助生成 · 当前为开发初始化页面</text>
+</view>
