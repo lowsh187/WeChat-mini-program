@@ -69,6 +69,10 @@ export interface SessionDocument extends DatabaseDocument {
   configVersion: string;
   currentStep: string;
   followupRound: 0 | 1 | 2;
+  clientVersion: string;
+  ownerKeyHash: string;
+  deletionTokenHash: string;
+  anonymousDeviceSessionHash?: string;
   expiresAt: Date;
 }
 
