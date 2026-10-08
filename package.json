@@ -8,11 +8,12 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "db:validate": "node scripts/validate-database.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run typecheck && npm run lint && npm run format:check"
+    "check": "npm run db:validate && npm run typecheck && npm run lint && npm run format:check"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

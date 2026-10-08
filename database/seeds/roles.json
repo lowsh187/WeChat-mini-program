@@ -1,0 +1,97 @@
+{
+  "configVersion": "1.0.0",
+  "contentStatus": "mvp_hypothesis_for_team_review",
+  "weightUnit": "integer_percent",
+  "roles": [
+    {
+      "roleId": "data_analyst",
+      "name": "数据分析",
+      "description": "通过数据识别异常、解释原因并支持决策。",
+      "capabilityWeights": {
+        "information_extraction": 25,
+        "logical_analysis": 25,
+        "user_insight": 10,
+        "communication": 20,
+        "execution_planning": 10,
+        "creative_ideation": 10
+      },
+      "status": "draft",
+      "mvpHypothesis": true
+    },
+    {
+      "roleId": "product_operations",
+      "name": "产品运营",
+      "description": "围绕用户和业务目标设计并执行运营方案。",
+      "capabilityWeights": {
+        "information_extraction": 10,
+        "logical_analysis": 10,
+        "user_insight": 25,
+        "communication": 10,
+        "execution_planning": 25,
+        "creative_ideation": 20
+      },
+      "status": "draft",
+      "mvpHypothesis": true
+    },
+    {
+      "roleId": "user_researcher",
+      "name": "用户研究",
+      "description": "从用户材料中提炼需求、区分事实与假设并设计验证。",
+      "capabilityWeights": {
+        "information_extraction": 25,
+        "logical_analysis": 10,
+        "user_insight": 25,
+        "communication": 20,
+        "execution_planning": 10,
+        "creative_ideation": 10
+      },
+      "status": "draft",
+      "mvpHypothesis": true
+    },
+    {
+      "roleId": "product_manager",
+      "name": "产品经理",
+      "description": "在用户价值与有限资源之间排序、取舍并定义最小方案。",
+      "capabilityWeights": {
+        "information_extraction": 10,
+        "logical_analysis": 25,
+        "user_insight": 25,
+        "communication": 10,
+        "execution_planning": 20,
+        "creative_ideation": 10
+      },
+      "status": "draft",
+      "mvpHypothesis": true
+    },
+    {
+      "roleId": "project_manager",
+      "name": "项目管理",
+      "description": "识别阻塞、安排顺序并推动团队同步执行。",
+      "capabilityWeights": {
+        "information_extraction": 10,
+        "logical_analysis": 20,
+        "user_insight": 10,
+        "communication": 25,
+        "execution_planning": 25,
+        "creative_ideation": 10
+      },
+      "status": "draft",
+      "mvpHypothesis": true
+    },
+    {
+      "roleId": "content_strategist",
+      "name": "内容策划",
+      "description": "理解受众并提出差异化、可落地的内容表达。",
+      "capabilityWeights": {
+        "information_extraction": 10,
+        "logical_analysis": 10,
+        "user_insight": 25,
+        "communication": 20,
+        "execution_planning": 10,
+        "creative_ideation": 25
+      },
+      "status": "draft",
+      "mvpHypothesis": true
+    }
+  ]
+}

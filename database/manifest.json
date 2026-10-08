@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0.0",
+  "configVersion": "1.0.0",
+  "defaultEnvironment": "cloud1-d9g4vq6r057873c75",
+  "productionEnvironment": "pathai-prod-d6gh4i6u3bfbbdcea",
+  "collections": [
+    {
+      "name": "roles",
+      "purpose": "岗位、六维权重与岗位介绍",
+      "clientAccess": "none",
+      "seedFile": "seeds/roles.json"
+    },
+    {
+      "name": "base_questions",
+      "purpose": "基础题、选项、维度映射及预设追问题库",
+      "clientAccess": "none",
+      "seedFile": "seeds/base_questions.json"
+    },
+    {
+      "name": "work_trials",
+      "purpose": "试岗场景、材料、任务与固定 Rubric",
+      "clientAccess": "none",
+      "seedFile": null
+    },
+    {
+      "name": "sessions",
+      "purpose": "匿名会话、进度、版本和过期时间",
+      "clientAccess": "none",
+      "seedFile": null
+    },
+    {
+      "name": "assessments",
+      "purpose": "初步评分、试岗评分和行为证据",
+      "clientAccess": "none",
+      "seedFile": null
+    },
+    {
+      "name": "action_plans",
+      "purpose": "七天行动任务与完成状态",
+      "clientAccess": "none",
+      "seedFile": null
+    },
+    {
+      "name": "feedback",
+      "purpose": "结果帮助度、岗位兴趣和开放反馈",
+      "clientAccess": "none",
+      "seedFile": null
+    },
+    {
+      "name": "events",
+      "purpose": "匿名漏斗事件与耗时，不保存完整回答",
+      "clientAccess": "none",
+      "seedFile": null
+    }
+  ]
+}
