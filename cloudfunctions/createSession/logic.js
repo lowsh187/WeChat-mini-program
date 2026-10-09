@@ -73,6 +73,7 @@ function createSessionPayload({ input, appId, openId, now = new Date() }) {
     clientVersion: input.clientVersion,
     currentStep: "session_created",
     followupRound: 0,
+    selectedFollowupQuestionIds: [],
     ownerKeyHash: sha256(`${appId}:${openId}`),
     deletionTokenHash: sha256(deletionToken),
     expiresAt,

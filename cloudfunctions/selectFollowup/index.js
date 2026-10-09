@@ -1,6 +1,7 @@
 const cloud = require("wx-server-sdk");
 const {
   errorResponse,
+  findFollowupQuestion,
   selectFollowupQuestion,
   sha256,
   successResponse,
@@ -39,19 +40,41 @@ exports.main = async (event) => {
       return errorResponse("SESSION_EXPIRED", "会话不存在或已过期，请重新开始。", false);
     }
 
-    const question = selectFollowupQuestion(input);
+    const session = result.data[0];
+    const selectedQuestionIds = Array.isArray(session.selectedFollowupQuestionIds)
+      ? session.selectedFollowupQuestionIds
+      : [];
+
+    if (input.round <= session.followupRound) {
+      const previousQuestion = findFollowupQuestion(
+        selectedQuestionIds[input.round - 1],
+        input.round,
+      );
+      return previousQuestion
+        ? successResponse(previousQuestion)
+        : errorResponse("INVALID_ARGUMENT", "该轮追问已经完成。", false);
+    }
+    if (input.round !== session.followupRound + 1) {
+      return errorResponse("INVALID_ARGUMENT", "追问轮次必须按顺序进行。", false);
+    }
+
+    const question = selectFollowupQuestion({
+      ...input,
+      answeredQuestionIds: [...new Set([...input.answeredQuestionIds, ...selectedQuestionIds])],
+    });
     if (!question) {
       return errorResponse("INVALID_ARGUMENT", "固定追问题库中没有可用题目。", false);
     }
 
     await database
       .collection("sessions")
-      .doc(result.data[0]._id)
+      .doc(session._id)
       .update({
         data: {
           status: "profiling",
           currentStep: `followup_round_${input.round}`,
           followupRound: input.round,
+          selectedFollowupQuestionIds: command.push([question.questionId]),
           updatedAt: now,
         },
       });

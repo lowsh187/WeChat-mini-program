@@ -3,8 +3,12 @@ import test from "node:test";
 
 import selectFollowupLogic from "../cloudfunctions/selectFollowup/logic.js";
 
-const { FOLLOWUP_QUESTIONS, selectFollowupQuestion, validateSelectFollowupInput } =
-  selectFollowupLogic;
+const {
+  FOLLOWUP_QUESTIONS,
+  findFollowupQuestion,
+  selectFollowupQuestion,
+  validateSelectFollowupInput,
+} = selectFollowupLogic;
 
 const validInput = {
   sessionId: "ses_0123456789abcdef0123456789abcdef",
@@ -52,4 +56,11 @@ test("never repeats an answered preset question", () => {
 
   assert.notEqual(second.questionId, first.questionId);
   assert.equal(second.round, 2);
+});
+
+test("reconstructs an idempotent response from a stored preset question", () => {
+  const restored = findFollowupQuestion("followup_logic_01", 2);
+  assert.equal(restored.round, 2);
+  assert.equal(restored.dimension, "logical_analysis");
+  assert.equal(findFollowupQuestion("unknown", 1), null);
 });

@@ -149,6 +149,17 @@ function selectFollowupQuestion(input) {
   return null;
 }
 
+function findFollowupQuestion(questionId, round) {
+  const question = FOLLOWUP_QUESTIONS.find((candidate) => candidate.questionId === questionId);
+  if (!question) return null;
+  return {
+    round,
+    dimension: question.dimension,
+    questionId: question.questionId,
+    questionText: question.questionText,
+  };
+}
+
 function successResponse(data) {
   return {
     status: "success",
@@ -175,6 +186,7 @@ module.exports = {
   DIMENSIONS,
   FOLLOWUP_QUESTIONS,
   errorResponse,
+  findFollowupQuestion,
   selectFollowupQuestion,
   sha256,
   successResponse,

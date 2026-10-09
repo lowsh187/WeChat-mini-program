@@ -59,6 +59,7 @@ test("creates an anonymous, expiring session without storing raw identifiers", (
   assert.equal(record.anonymousDeviceSessionId, undefined);
   assert.equal(record.status, "created");
   assert.equal(record.followupRound, 0);
+  assert.deepEqual(record.selectedFollowupQuestionIds, []);
   assert.equal(record.expiresAt.getTime() - now.getTime(), SESSION_LIFETIME_DAYS * 86400000);
 });
 
