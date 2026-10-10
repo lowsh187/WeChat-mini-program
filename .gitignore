@@ -1,0 +1,19 @@
+node_modules/
+miniprogram/miniprogram_npm/
+dist/
+coverage/
+.check-build/
+*.tsbuildinfo
+*.log
+project.private.config.json
+project.local.config.json
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+# TypeScript is compiled by WeChat DevTools; emitted JS is not source.
+miniprogram/**/*.js
+miniprogram/**/*.js.map

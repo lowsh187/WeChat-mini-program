@@ -1,0 +1,4 @@
+.materials { padding: 24rpx; }
+.material { font-size: 25rpx; line-height: 1.65; padding: 14rpx 0; border-bottom: 1rpx solid #edf0e8; }
+.material:last-child { border-bottom: none; }
+.material-label { color: #357567; font-weight: 600; }

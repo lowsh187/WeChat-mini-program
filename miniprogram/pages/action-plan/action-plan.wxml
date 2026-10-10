@@ -1,0 +1,10 @@
+<view class="page">
+  <view class="eyebrow">流程占位 / 七天行动</view>
+  <view class="title">七天行动计划尚未实现</view>
+  <view class="notice">当前没有生成个人计划，也没有任务完成记录。</view>
+  <view class="card">
+    <view class="card-title">下一阶段将提供</view>
+    <view class="muted">围绕岗位探索的七个有序任务，支持勾选与保存。使用岗位模板和少量个性化建议，等待计划数据模型与 B 确认。</view>
+    <button class="primary" bindtap="home">返回首页</button>
+  </view>
+</view>

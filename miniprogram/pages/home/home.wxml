@@ -1,0 +1,26 @@
+<view class="page">
+  <view class="eyebrow">PATHAI · 职业探索</view>
+  <view class="title"><view>先体验一份工作，</view><view>再探索你的方向。</view></view>
+  <view class="subtitle">从自己的选择出发，通过微型职业实验了解岗位，再把发现变成行动。</view>
+  <view class="notice">前端 Mock 演示 · 不调用 AI。可体验画像、两轮预设追问、三个岗位试岗和固定示例证据。七天计划尚未实现。</view>
+  <view class="card">
+    <view class="card-title">今天，从 8 道情境题开始</view>
+    <view class="muted">没有标准答案，选择更接近你会采取的做法。答案只保存在当前设备，不上传。</view>
+    <button class="primary" bindtap="start">{{hasSession ? '重新开始' : '开始探索'}}</button>
+    <block wx:if="{{canContinue}}">
+      <view class="saved">已有进度：已答 {{answeredCount}} / {{total}} 题</view>
+      <button class="secondary" bindtap="resume">继续上次体验</button>
+    </block>
+    <button class="link-button" bindtap="preview">先看看 Mock 推荐示例</button>
+  </view>
+  <view class="card">
+    <view class="card-title">正式产品的探索路径</view>
+    <view class="flow-item">01　基础画像 → 最多两轮动态追问</view>
+    <view class="flow-item">02　三个岗位方向 → 3～5 分钟试岗</view>
+    <view class="flow-item">03　行为证据与推荐变化 → 七天行动</view>
+    <button class="link-button" bindtap="showFollowup">查看 Mock 追问</button>
+  </view>
+  <view wx:if="{{warning}}" class="error">{{warning}}</view>
+  <button wx:if="{{hasSession || warning}}" class="link-button" bindtap="clear">清除本地记录</button>
+  <view class="muted footer">PathAI 帮助你探索方向，不替你作出职业决定。</view>
+</view>

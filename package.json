@@ -1,0 +1,16 @@
+{
+  "name": "pathai-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PathAI 成员 A 第一阶段原生小程序 Mock 前端",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "check:structure": "node scripts/check-structure.cjs",
+    "test": "node scripts/test-logic.cjs",
+    "check": "npm run typecheck && npm run check:structure && npm test"
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^4.0.0",
+    "typescript": "~5.9.3"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "desc": "第一阶段开发演示页面不参与搜索索引",
+  "rules": [{ "action": "disallow", "page": "*" }]
+}

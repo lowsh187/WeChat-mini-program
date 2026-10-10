@@ -1,0 +1,18 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/profile/profile",
+    "pages/followup/followup",
+    "pages/initial-result/initial-result",
+    "pages/work-trial/work-trial",
+    "pages/trial-result/trial-result",
+    "pages/action-plan/action-plan"
+  ],
+  "window": {
+    "navigationBarTitleText": "PathAI 职业试岗舱",
+    "navigationBarBackgroundColor": "#f6f7f2",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f6f7f2"
+  },
+  "sitemapLocation": "sitemap.json"
+}

@@ -1,0 +1,19 @@
+<view class="page">
+  <view class="eyebrow">05 / 示例证据</view>
+  <view class="title">看懂证据如何表达</view>
+  <view class="notice">Mock 演示数据，非真实 AI 评估。以下证据来自固定“示例作答”，与你刚才输入的内容无关，不代表你的真实能力。</view>
+  <view wx:if="{{!result}}" class="card"><view class="card-title">当前没有已完成的试岗</view><view class="muted">先完成一个 Mock 试岗，才会记录固定示例结果。</view><button class="primary" bindtap="trial">进入试岗</button></view>
+  <block wx:else>
+    <view class="badge">{{result.roleName}} · Mock 任务已完成</view>
+    <view wx:if="{{degraded}}" class="notice">模拟降级结果：{{message}}</view>
+    <view class="card"><view class="card-title">用于演示的作答</view><view class="subtitle">{{result.exampleAnswer}}</view></view>
+    <view wx:for="{{result.evidence}}" wx:key="dimensionLabel" class="card">
+      <view class="badge">{{item.dimensionLabel}} · 无数值评分</view><view class="card-title">{{item.examplePerformance}}</view>
+      <view class="subtitle">{{item.exampleEvidence}}</view><view class="section-title">改进建议示例</view><view class="subtitle">{{item.improvement}}</view>
+    </view>
+    <view class="card"><view class="card-title">下一步仍由你探索</view><view class="muted">本次不计算推荐变化。七天行动计划保留入口，尚未实现；正式评价需接入 B 的已验证接口。</view><button class="secondary" bindtap="recommendation">返回初步推荐示例</button><button class="secondary" bindtap="plan">查看七天计划待开发入口</button></view>
+    <button class="primary" bindtap="trial">返回试岗 / 重新试岗</button>
+  </block>
+  <view wx:if="{{warning}}" class="error">{{warning}}<button class="secondary" bindtap="retrySave">重试保存</button></view>
+  <button class="link-button" bindtap="home">返回首页</button>
+</view>

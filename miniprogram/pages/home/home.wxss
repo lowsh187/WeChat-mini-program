@@ -1,0 +1,3 @@
+.saved { margin-top: 24rpx; color: #357567; text-align: center; font-size: 25rpx; }
+.flow-item { padding: 14rpx 0; line-height: 1.7; font-size: 25rpx; }
+.footer { text-align: center; margin-top: 36rpx; }
