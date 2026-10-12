@@ -78,6 +78,11 @@
     ],
     "feedback": [
       {
+        "name": "feedback_session_unique",
+        "unique": true,
+        "fields": [{ "field": "sessionId", "order": "asc" }]
+      },
+      {
         "name": "feedback_session_created",
         "unique": false,
         "fields": [
