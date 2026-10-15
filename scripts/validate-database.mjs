@@ -29,6 +29,9 @@ const manifest = await readJson("database/manifest.json");
 const indexes = await readJson("database/indexes.json");
 const roleSeed = await readJson("database/seeds/roles.json");
 const questionSeed = await readJson("database/seeds/base_questions.json");
+const preferenceConfig = await readJson("database/config/preferences.v2.json");
+const rubricConfig = await readJson("database/config/rubrics.v2.json");
+const trialSeed = await readJson("database/seeds/work_trials.v2.json");
 
 const expectedCollections = [
   "roles",
@@ -101,4 +104,59 @@ for (const question of questionSeed.questions) {
   }
 }
 
-console.log("Database manifest, indexes, role seeds, and base-question seeds are valid.");
+assert.equal(preferenceConfig.reviewStatus, "draft_for_joint_review");
+assert.deepEqual(
+  new Set(Object.keys(preferenceConfig.matrix)),
+  new Set(["facts", "people", "practice", "unsure"]),
+);
+for (const [preference, scores] of Object.entries(preferenceConfig.matrix)) {
+  assert.deepEqual(new Set(Object.keys(scores)), roleIds, `${preference} 必须覆盖六岗位`);
+  for (const score of Object.values(scores))
+    assert(score >= 0 && score <= 5, "偏好匹配分必须为 0～5");
+}
+assert.equal(
+  new Set(Object.values(preferenceConfig.matrix.unsure)).size,
+  1,
+  "unsure 必须对六岗位等贡献",
+);
+
+assert.equal(rubricConfig.reviewedByProfessional, false, "未审阅 Rubric 不得标记为专业复核");
+assert.deepEqual(new Set(Object.keys(rubricConfig.anchors)), dimensions, "Rubric 必须覆盖六维");
+for (const [dimension, anchors] of Object.entries(rubricConfig.anchors)) {
+  assert.equal(anchors.length, 6, `${dimension} 必须包含 0～5 共六级锚点`);
+  assert(
+    anchors.every((anchor) => typeof anchor === "string" && anchor.trim()),
+    `${dimension} 锚点不能为空`,
+  );
+}
+
+assert.equal(trialSeed.trials.length, 3, "比赛版只开放三个正式试岗");
+assert.equal(
+  new Set(trialSeed.trials.map(({ trialId }) => trialId)).size,
+  3,
+  "正式 trialId 不得重复",
+);
+for (const trial of trialSeed.trials) {
+  assert(roleIds.has(trial.roleId), `${trial.trialId} 岗位不存在`);
+  assert.equal(
+    trial.questions.filter(({ required }) => required).length,
+    3,
+    `${trial.trialId} 必须有三道必答题`,
+  );
+  assert.equal(
+    trial.questions.filter(({ required }) => !required).length,
+    1,
+    `${trial.trialId} 必须有一道选答题`,
+  );
+  assert.equal(
+    new Set(trial.questions.map(({ questionId }) => questionId)).size,
+    4,
+    `${trial.trialId} questionId 不得重复`,
+  );
+  assert(
+    trial.rubricDimensions.every((dimension) => dimensions.has(dimension)),
+    `${trial.trialId} Rubric 维度未知`,
+  );
+}
+
+console.log("Database v1 skeleton and v2 draft configurations are valid.");

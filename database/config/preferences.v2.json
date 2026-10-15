@@ -1,0 +1,40 @@
+{
+  "configVersion": "2.0.0",
+  "reviewStatus": "draft_for_joint_review",
+  "scale": { "min": 0, "max": 5 },
+  "notes": "Member B proposal. Preference affects role matching only and never changes capability observations.",
+  "matrix": {
+    "facts": {
+      "data_analyst": 5,
+      "product_operations": 2,
+      "user_researcher": 4,
+      "product_manager": 4,
+      "project_manager": 3,
+      "content_strategist": 2
+    },
+    "people": {
+      "data_analyst": 2,
+      "product_operations": 5,
+      "user_researcher": 5,
+      "product_manager": 4,
+      "project_manager": 4,
+      "content_strategist": 4
+    },
+    "practice": {
+      "data_analyst": 3,
+      "product_operations": 5,
+      "user_researcher": 3,
+      "product_manager": 4,
+      "project_manager": 5,
+      "content_strategist": 3
+    },
+    "unsure": {
+      "data_analyst": 3,
+      "product_operations": 3,
+      "user_researcher": 3,
+      "product_manager": 3,
+      "project_manager": 3,
+      "content_strategist": 3
+    }
+  }
+}
