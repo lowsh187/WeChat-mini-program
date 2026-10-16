@@ -44,6 +44,7 @@ npm run check
 ```text
 miniprogram/       小程序客户端
 cloudfunctions/    微信云函数（每个函数独立安装生产依赖）
+database/          集合清单、索引与可校验种子配置
 shared/            稳定枚举与接口契约
 docs/              企划、契约和协作文档
 ```

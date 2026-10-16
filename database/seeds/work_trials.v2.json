@@ -1,0 +1,90 @@
+{
+  "configVersion": "2.0.0",
+  "reviewStatus": "draft_for_joint_review",
+  "trials": [
+    {
+      "trialId": "trial_data_signup_drop_v1",
+      "roleId": "data_analyst",
+      "legacyUiId": "ui-trial-data-analyst",
+      "rubricDimensions": ["information_extraction", "logical_analysis", "communication"],
+      "questions": [
+        {
+          "questionId": "data_signup_facts",
+          "required": true,
+          "prompt": "请从材料中列出最关键的事实与异常。"
+        },
+        {
+          "questionId": "data_signup_hypotheses",
+          "required": true,
+          "prompt": "请提出可能原因并说明支持或反对证据。"
+        },
+        {
+          "questionId": "data_signup_next_step",
+          "required": true,
+          "prompt": "请给出下一步验证方案和判断标准。"
+        },
+        {
+          "questionId": "data_signup_summary",
+          "required": false,
+          "prompt": "请用三句话向团队总结。"
+        }
+      ]
+    },
+    {
+      "trialId": "trial_operations_reading_event_v1",
+      "roleId": "product_operations",
+      "legacyUiId": "ui-trial-product-operations",
+      "rubricDimensions": ["user_insight", "execution_planning", "creative_ideation"],
+      "questions": [
+        {
+          "questionId": "ops_event_goal",
+          "required": true,
+          "prompt": "请明确活动目标与目标用户。"
+        },
+        {
+          "questionId": "ops_event_plan",
+          "required": true,
+          "prompt": "请设计一个可执行的活动方案。"
+        },
+        {
+          "questionId": "ops_event_metric",
+          "required": true,
+          "prompt": "请定义关键指标和复盘方式。"
+        },
+        {
+          "questionId": "ops_event_risk",
+          "required": false,
+          "prompt": "请补充一个主要风险及预案。"
+        }
+      ]
+    },
+    {
+      "trialId": "trial_research_study_room_v1",
+      "roleId": "user_researcher",
+      "legacyUiId": "ui-trial-user-researcher",
+      "rubricDimensions": ["information_extraction", "user_insight", "communication"],
+      "questions": [
+        {
+          "questionId": "research_room_signal",
+          "required": true,
+          "prompt": "请区分材料中的事实、观点与未知信息。"
+        },
+        {
+          "questionId": "research_room_insight",
+          "required": true,
+          "prompt": "请提出一个用户洞察并引用证据。"
+        },
+        {
+          "questionId": "research_room_validation",
+          "required": true,
+          "prompt": "请设计下一步访谈或验证问题。"
+        },
+        {
+          "questionId": "research_room_summary",
+          "required": false,
+          "prompt": "请向产品团队简要说明研究结论。"
+        }
+      ]
+    }
+  ]
+}

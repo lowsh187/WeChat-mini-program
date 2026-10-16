@@ -8,11 +8,14 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "db:validate": "node scripts/validate-database.mjs",
+    "test": "node --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
+    "metrics:summarize": "node scripts/summarize-metrics.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run typecheck && npm run lint && npm run format:check"
+    "check": "npm run db:validate && npm test && npm run typecheck && npm run lint && npm run format:check"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

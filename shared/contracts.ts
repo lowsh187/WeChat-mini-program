@@ -70,7 +70,9 @@ export interface CreateSessionRequest {
 
 export interface CreateSessionData {
   sessionId: string;
+  deletionToken: string;
   progress: "created";
+  expiresAt: string;
 }
 
 export interface SelectFollowupRequest {

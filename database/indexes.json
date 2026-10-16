@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0.0",
+  "indexes": {
+    "roles": [
+      {
+        "name": "role_id_unique",
+        "unique": true,
+        "fields": [{ "field": "roleId", "order": "asc" }]
+      },
+      {
+        "name": "role_status_version",
+        "unique": false,
+        "fields": [
+          { "field": "status", "order": "asc" },
+          { "field": "configVersion", "order": "desc" }
+        ]
+      }
+    ],
+    "base_questions": [
+      {
+        "name": "question_id_unique",
+        "unique": true,
+        "fields": [{ "field": "questionId", "order": "asc" }]
+      },
+      {
+        "name": "question_type_status_order",
+        "unique": false,
+        "fields": [
+          { "field": "questionType", "order": "asc" },
+          { "field": "status", "order": "asc" },
+          { "field": "order", "order": "asc" }
+        ]
+      }
+    ],
+    "work_trials": [
+      {
+        "name": "trial_id_unique",
+        "unique": true,
+        "fields": [{ "field": "trialId", "order": "asc" }]
+      },
+      {
+        "name": "trial_role_status",
+        "unique": false,
+        "fields": [
+          { "field": "roleId", "order": "asc" },
+          { "field": "status", "order": "asc" }
+        ]
+      }
+    ],
+    "sessions": [
+      {
+        "name": "session_id_unique",
+        "unique": true,
+        "fields": [{ "field": "sessionId", "order": "asc" }]
+      },
+      {
+        "name": "session_expires_at",
+        "unique": false,
+        "fields": [{ "field": "expiresAt", "order": "asc" }]
+      }
+    ],
+    "assessments": [
+      {
+        "name": "assessment_session_created",
+        "unique": false,
+        "fields": [
+          { "field": "sessionId", "order": "asc" },
+          { "field": "createdAt", "order": "desc" }
+        ]
+      }
+    ],
+    "action_plans": [
+      {
+        "name": "action_plan_session_unique",
+        "unique": true,
+        "fields": [{ "field": "sessionId", "order": "asc" }]
+      }
+    ],
+    "feedback": [
+      {
+        "name": "feedback_session_unique",
+        "unique": true,
+        "fields": [{ "field": "sessionId", "order": "asc" }]
+      },
+      {
+        "name": "feedback_session_created",
+        "unique": false,
+        "fields": [
+          { "field": "sessionId", "order": "asc" },
+          { "field": "createdAt", "order": "desc" }
+        ]
+      }
+    ],
+    "events": [
+      {
+        "name": "event_session_name_created",
+        "unique": false,
+        "fields": [
+          { "field": "sessionId", "order": "asc" },
+          { "field": "eventName", "order": "asc" },
+          { "field": "createdAt", "order": "desc" }
+        ]
+      }
+    ]
+  }
+}
