@@ -44,6 +44,19 @@ export interface ScoreTrialRequestV2 {
   answers: Record<string, string>;
 }
 
+export interface GetInitialRecommendationRequestV2 {
+  sessionId: string;
+  baseAnswers: Record<string, string>;
+  preferredApproach: "facts" | "people" | "practice" | "unsure";
+  followupAnswers: Record<string, string>;
+}
+
+export interface RoleRecommendationV2 {
+  roleId: RoleIdV2;
+  score: number;
+  reasons: string[];
+}
+
 export interface ScoreComponentV2 {
   name: "base" | "preference" | "followup";
   score: number | null;
@@ -55,6 +68,41 @@ export interface InitialRecommendationMetadataV2 {
   effectiveWeights: { base: number; preference: number; followup: number };
   missingComponents: Array<"followup">;
   comparableToFullScore: boolean;
+}
+
+export interface GetInitialRecommendationDataV2 extends InitialRecommendationMetadataV2 {
+  capabilityObservations: CapabilityObservation[];
+  recommendations: [RoleRecommendationV2, RoleRecommendationV2, RoleRecommendationV2];
+}
+
+export interface ScoreTrialDataV2 {
+  trialId: string;
+  trialAttemptId: string;
+  capabilityObservations: CapabilityObservation[];
+  recommendationsBefore: [RoleRecommendationV2, RoleRecommendationV2, RoleRecommendationV2];
+  recommendationsAfter: [RoleRecommendationV2, RoleRecommendationV2, RoleRecommendationV2];
+  changeExplanation: string[];
+  practicePriorities: PracticePriorityV2[];
+  replayed: boolean;
+}
+
+export type ErrorCodeV2 =
+  | "INVALID_ARGUMENT"
+  | "SESSION_EXPIRED"
+  | "NOT_FOUND"
+  | "CONFLICT"
+  | "AI_TIMEOUT"
+  | "AI_UNAVAILABLE"
+  | "AI_SCHEMA_INVALID"
+  | "UNKNOWN_ERROR";
+
+export interface ApiResponseV2<T> {
+  status: "success" | "degraded" | "error";
+  contractVersion: typeof CONTRACT_VERSION_V2;
+  configVersion: typeof CONFIG_VERSION_V2;
+  data: T | null;
+  error: { code: ErrorCodeV2; message: string; retryable: boolean } | null;
+  aiGenerated: boolean;
 }
 
 export interface PracticePriorityV2 {
@@ -76,6 +124,11 @@ export interface GetActionPlanDataV2 {
   roleId: RoleIdV2;
   practicePriorities: PracticePriorityV2[];
   progressStorage: "local_device_only";
+  items: Array<{
+    day: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+    title: string;
+    description: string;
+  }>;
 }
 
 export type FormalEventNameV2 =
