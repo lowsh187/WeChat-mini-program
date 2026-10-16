@@ -17,6 +17,7 @@ export interface ProfileDraft {
 }
 export interface FollowupProgress {
   drafts: string[];
+  questionIds?: string[];
   round: number;
   submittedCount: number;
 }
@@ -48,7 +49,7 @@ export interface RecommendationCard extends RolePreview {
   focusDimensions: string[];
 }
 export interface InitialRecommendationView {
-  source: "mock";
+  source: "mock" | "cloud";
   notice: string;
   cards: RecommendationCard[];
 }
@@ -84,13 +85,19 @@ export interface TrialEvidenceExample {
   improvement: string;
 }
 export interface TrialResultView {
-  source: "mock";
+  source: "mock" | "cloud";
   localTrialId: string;
   roleName: string;
   notice: string;
   exampleAnswer: string;
   evidence: TrialEvidenceExample[];
   observations?: CapabilityObservation[] | undefined;
+  recommendationsBefore?: string[] | undefined;
+  recommendationsAfter?: string[] | undefined;
+  changeExplanation?: string[] | undefined;
+  practicePriorities?:
+    { dimension: string; title: string; reason: string; suggestion: string }[] | undefined;
+  roleId?: string | undefined;
 }
 export interface TrialProgress {
   trialAttemptId: string;

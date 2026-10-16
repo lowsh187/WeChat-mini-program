@@ -1,21 +1,21 @@
 <view class="page">
   <view class="eyebrow">04 / 微型职业实验</view>
   <view class="title">先试做，再认识岗位</view>
-  <view class="notice">Mock 演示 · 材料为虚构内容草案，目标 3～5 分钟。提交后展示固定示例证据，不分析或评价你的回答。</view>
+  <view class="notice">材料为虚构任务，目标 3～5 分钟。提交后由云端依据固定 Rubric 生成行为证据；结果仅供探索。</view>
   <view class="scenario-buttons"><button wx:for="{{options}}" wx:key="localRoleId" class="secondary" disabled="{{loading || submitting}}" data-role="{{item.localRoleId}}" bindtap="selectRole">{{item.roleName}}{{item.localRoleId === localRoleId ? ' ✓' : ''}}</button></view>
-  <view wx:if="{{loading}}" class="card"><view>正在读取 Mock 材料…</view><button loading disabled>请稍候</button></view>
+  <view wx:if="{{loading}}" class="card"><view>正在读取试岗材料…</view><button loading disabled>请稍候</button></view>
   <view wx:elif="{{error}}" class="error">{{error}}<button class="secondary" bindtap="retryLoad">重试读取</button></view>
   <view wx:elif="{{!definition}}" class="card"><view>暂时没有试岗材料</view><button class="secondary" bindtap="retryLoad">重试读取</button></view>
   <block wx:else>
     <view class="card"><view class="card-title">{{definition.roleName}} · 工作场景</view><view class="subtitle">{{definition.scenario}}</view></view>
-    <view wx:if="{{!ready}}" class="notice">可以浏览示例材料。开始试岗需要先完成画像与两轮追问。<button class="secondary" bindtap="followup">前往 Mock 追问</button></view>
+    <view wx:if="{{!ready}}" class="notice">可以浏览材料。开始试岗需要先完成画像与两轮追问。<button class="secondary" bindtap="followup">前往动态追问</button></view>
     <button wx:elif="{{!started}}" class="primary" bindtap="start">开始 4 分钟试岗</button>
     <view wx:if="{{started}}" class="card">
-      <view class="card-title">{{completed ? 'Mock 试岗已完成' : '剩余时间：' + clockLabel}}</view>
+      <view class="card-title">{{completed ? '试岗已完成' : '剩余时间：' + clockLabel}}</view>
       <progress percent="{{timeProgress}}" activeColor="#276b5b" stroke-width="5" />
       <view class="muted">计时包含后台停留时间，仅作节奏提醒。到时不清空答案，不自动提交。</view>
       <view wx:if="{{expired && !completed}}" class="notice">建议时间已到，答案已保留。你仍可补充后提交。</view>
-      <button wx:if="{{completed}}" class="primary" bindtap="result">查看固定 Mock 结果</button>
+      <button wx:if="{{completed}}" class="primary" bindtap="result">查看试岗结果</button>
     </view>
     <view class="card materials"><view class="card-title">工作材料 · 虚构示例</view><view wx:for="{{definition.materials}}" wx:key="label" class="material"><view class="material-label">{{item.label}}</view><view>{{item.content}}</view></view></view>
     <view wx:for="{{answerFields}}" wx:key="localId" class="card">
@@ -25,13 +25,13 @@
     </view>
     <view wx:if="{{started}}" class="card"><view class="card-title">可选补充 · 预设追问</view><view class="muted">{{definition.supplementaryPrompt}}此问题固定，不由 AI 生成。</view><textarea class="answer" value="{{supplementaryAnswer}}" maxlength="1200" data-field="ui-supplement" disabled="{{submitting || completed}}" bindinput="input" placeholder="可留空" /></view>
     <view wx:if="{{validation}}" class="error">{{validation}}</view>
-    <view wx:if="{{submissionError}}" class="error">{{submissionError}}<button class="secondary" bindtap="retrySubmit">用正常 Mock 重试提交</button></view>
+    <view wx:if="{{submissionError}}" class="error">{{submissionError}}<button class="secondary" bindtap="retrySubmit">重试提交</button></view>
     <view wx:if="{{message}}" class="notice">{{message}}</view>
-    <button wx:if="{{started && !completed}}" class="primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">提交并查看 Mock 示例证据</button>
-    <view wx:if="{{submitting}}" class="notice">{{scenario === 'timeout' ? '正在模拟 15 秒超时，随后返回固定降级模板。' : '正在读取固定示例结果，不上传回答、不调用 AI。'}}</view>
+    <button wx:if="{{started && !completed}}" class="primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">提交并生成行为证据</button>
+    <view wx:if="{{submitting}}" class="notice">正在进行云端评分，最多可能需要约 35 秒，请勿重复提交。</view>
     <button wx:if="{{started}}" class="secondary" disabled="{{submitting}}" bindtap="restart">重新试岗</button>
   </block>
   <view wx:if="{{warning}}" class="error">{{warning}}<button class="secondary" bindtap="retrySave">重试保存</button></view>
-  <view class="card"><view class="card-title">Mock 状态验收</view><view class="muted">当前场景：{{scenario}}。选择场景后点“按场景读取材料”或提交答案。</view><view class="scenario-buttons"><button wx:for="{{['normal','empty','error','degraded','timeout']}}" wx:key="*this" disabled="{{loading || submitting}}" class="secondary" data-scenario="{{item}}" bindtap="simulate">{{item}}</button></view><button class="secondary" disabled="{{loading || submitting}}" bindtap="loadTrial">按场景读取材料</button></view>
+  <view wx:if="{{debug}}" class="card"><view class="card-title">状态验收</view><view class="muted">当前场景：{{scenario}}。</view><view class="scenario-buttons"><button wx:for="{{['normal','empty','error','degraded','timeout']}}" wx:key="*this" disabled="{{loading || submitting}}" class="secondary" data-scenario="{{item}}" bindtap="simulate">{{item}}</button></view><button class="secondary" disabled="{{loading || submitting}}" bindtap="loadTrial">按场景读取材料</button></view>
   <button class="link-button" bindtap="recommendation">返回推荐页</button><button class="link-button" bindtap="home">返回首页</button>
 </view>

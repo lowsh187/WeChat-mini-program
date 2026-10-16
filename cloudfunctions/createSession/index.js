@@ -1,4 +1,5 @@
 const cloud = require("wx-server-sdk");
+const { ensureDatabaseReady } = require("./bootstrap");
 const {
   createSessionPayload,
   errorResponse,
@@ -25,6 +26,7 @@ exports.main = async (event) => {
   }
 
   try {
+    await ensureDatabaseReady(database);
     const { record, publicData } = createSessionPayload({
       input: validation.value,
       appId: context.APPID,

@@ -4,6 +4,13 @@
  */
 import type { FrontendResult } from "../models/frontend";
 import { CLOUD_ENV_ID } from "../config/environment";
+import type {
+  GetInitialRecommendationDataV2,
+  GetInitialRecommendationRequestV2,
+  ScoreTrialDataV2,
+  ScoreTrialRequestV2,
+  TrackEventRequestV2,
+} from "../../shared/contracts.v2";
 
 export const cloudRoleIds = [
   "data_analyst",
@@ -34,6 +41,7 @@ export interface CloudQuestion {
   questionText: string;
 }
 export interface CloudPlan {
+  planId?: string;
   roleId: string;
   items: { day: number; title: string; description: string; completed: boolean }[];
   personalizedSuggestion: string;
@@ -99,6 +107,67 @@ const failure = (message: string): FrontendResult<never> => ({
   data: null,
   message,
 });
+
+const isObservationArray = (data: unknown): boolean =>
+  Array.isArray(data) &&
+  data.length <= 6 &&
+  data.every(
+    (item) =>
+      object(item) &&
+      dimensions.includes(item.dimension as string) &&
+      item.maxScore === 5 &&
+      Array.isArray(item.evidence) &&
+      ((item.status === "observed" &&
+        typeof item.score === "number" &&
+        item.score >= 0 &&
+        item.score <= 5 &&
+        item.evidence.length > 0 &&
+        item.evidence.every(text) &&
+        text(item.improvement)) ||
+        ((item.status === "not_observed" || item.status === "unavailable") &&
+          item.score === null &&
+          item.evidence.length === 0 &&
+          text(item.reason))),
+  );
+
+const isRecommendationArray = (data: unknown): boolean =>
+  Array.isArray(data) &&
+  data.length === 3 &&
+  new Set(data.map((item) => (object(item) ? item.roleId : ""))).size === 3 &&
+  data.every(
+    (item) =>
+      object(item) &&
+      cloudRoleIds.includes(item.roleId as string) &&
+      typeof item.score === "number" &&
+      Number.isFinite(item.score) &&
+      Array.isArray(item.reasons) &&
+      item.reasons.length > 0 &&
+      item.reasons.every(text),
+  );
+
+const isInitialRecommendationV2: Guard<GetInitialRecommendationDataV2> = (
+  data,
+): data is GetInitialRecommendationDataV2 =>
+  object(data) &&
+  isObservationArray(data.capabilityObservations) &&
+  isRecommendationArray(data.recommendations) &&
+  Array.isArray(data.scoreComponents) &&
+  object(data.effectiveWeights) &&
+  Array.isArray(data.missingComponents) &&
+  typeof data.comparableToFullScore === "boolean";
+
+const isScoreTrialV2: Guard<ScoreTrialDataV2> = (data): data is ScoreTrialDataV2 =>
+  object(data) &&
+  text(data.trialId) &&
+  text(data.trialAttemptId) &&
+  isObservationArray(data.capabilityObservations) &&
+  isRecommendationArray(data.recommendationsBefore) &&
+  isRecommendationArray(data.recommendationsAfter) &&
+  Array.isArray(data.changeExplanation) &&
+  data.changeExplanation.every(text) &&
+  Array.isArray(data.practicePriorities) &&
+  data.practicePriorities.length <= 2 &&
+  typeof data.replayed === "boolean";
 
 export function createCloudAdapter(transport: Transport, timeoutMs = 15000) {
   const pending = new Set<string>();
@@ -168,6 +237,60 @@ export function createCloudAdapter(transport: Transport, timeoutMs = 15000) {
       if (timer !== undefined) clearTimeout(timer);
     }
   }
+  async function callV2<T>(
+    name: string,
+    data: Record<string, unknown>,
+    valid: Guard<T>,
+  ): Promise<FrontendResult<T>> {
+    if (pending.has(name)) return failure("请求仍在处理中，请勿重复提交。");
+    pending.add(name);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const operation = Promise.resolve()
+      .then(() => transport(name, data))
+      .then((raw): FrontendResult<T> => {
+        if (
+          !object(raw) ||
+          raw.contractVersion !== "2.0.0" ||
+          raw.configVersion !== "2.0.0" ||
+          !["success", "degraded", "error"].includes(raw.status as string) ||
+          typeof raw.aiGenerated !== "boolean"
+        )
+          return failure("云端 v2 响应版本或结构不兼容，已阻止展示。");
+        if (raw.status === "error")
+          return failure(
+            object(raw.error) && text(raw.error.message)
+              ? raw.error.message
+              : "云端未能完成请求，请稍后重试。",
+          );
+        if (!valid(raw.data)) return failure("云端结果未通过安全校验，已阻止展示。");
+        return {
+          status: raw.status as "success" | "degraded",
+          data: raw.data,
+          message:
+            raw.status === "degraded" && object(raw.error) && text(raw.error.message)
+              ? raw.error.message
+              : "",
+        };
+      })
+      .catch(() => failure("云服务或本地保存异常，请检查网络和云环境配置。"))
+      .then((result) => {
+        pending.delete(name);
+        return result;
+      });
+    try {
+      return await Promise.race([
+        operation,
+        new Promise<FrontendResult<T>>((resolve) => {
+          timer = setTimeout(
+            () => resolve(failure("AI 请求超时，结果尚未确认，请勿重复提交。")),
+            timeoutMs,
+          );
+        }),
+      ]);
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
+  }
   return {
     createSession(onValidated?: (session: CloudSession) => void) {
       return call("createSession", { clientVersion: "0.1.0" }, isCloudSession, onValidated);
@@ -177,6 +300,23 @@ export function createCloudAdapter(transport: Transport, timeoutMs = 15000) {
         "selectFollowup",
         { sessionId, round, answeredQuestionIds, evidenceByDimension: {} },
         (data): data is CloudQuestion => isQuestion(data) && data.round === round,
+      );
+    },
+    getInitialRecommendation(request: GetInitialRecommendationRequestV2) {
+      return callV2(
+        "getInitialRecommendation",
+        request as unknown as Record<string, unknown>,
+        isInitialRecommendationV2,
+      );
+    },
+    scoreTrial(request: ScoreTrialRequestV2) {
+      return callV2(
+        "scoreTrial",
+        request as unknown as Record<string, unknown>,
+        (data): data is ScoreTrialDataV2 =>
+          isScoreTrialV2(data) &&
+          data.trialId === request.trialId &&
+          data.trialAttemptId === request.trialAttemptId,
       );
     },
     getActionPlan(sessionId: string, roleId: string, gaps: CloudCapability[]) {
@@ -208,7 +348,15 @@ export function createCloudAdapter(transport: Transport, timeoutMs = 15000) {
         (data): data is CloudPlan => isPlan(data) && data.roleId === roleId,
       );
     },
-    submitFeedback(sessionId: string, helpfulness: number, comment: string) {
+    submitFeedback(
+      sessionId: string,
+      helpfulness: number,
+      comment: string,
+      publicationConsent = {
+        granted: false,
+        textVersion: "pathai-publication-feedback-20261016-v1",
+      },
+    ) {
       if (
         !Number.isInteger(helpfulness) ||
         helpfulness < 1 ||
@@ -221,7 +369,12 @@ export function createCloudAdapter(transport: Transport, timeoutMs = 15000) {
         );
       return call(
         "submitFeedback",
-        { sessionId, helpfulness, ...(comment.trim() ? { comment: comment.trim() } : {}) },
+        {
+          sessionId,
+          helpfulness,
+          ...(comment.trim() ? { comment: comment.trim() } : {}),
+          publicationConsent,
+        },
         isMutation,
       );
     },
@@ -229,6 +382,9 @@ export function createCloudAdapter(transport: Transport, timeoutMs = 15000) {
       if (![eventName, step].every((value) => /^[a-z][a-z0-9_.-]{0,63}$/.test(value)))
         return Promise.resolve(failure("事件参数无效。"));
       return call("trackEvent", { sessionId, eventName, step }, isMutation);
+    },
+    trackFormalEvent(event: TrackEventRequestV2) {
+      return call("trackEvent", event as unknown as Record<string, unknown>, isMutation);
     },
     deleteSession(sessionId: string, confirmationToken: string) {
       return call("deleteSession", { sessionId, confirmationToken }, isMutation);

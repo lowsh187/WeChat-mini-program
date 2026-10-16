@@ -1,7 +1,7 @@
 <view class="page">
   <view class="eyebrow">01 / 基础画像</view>
   <view class="title">从真实的选择开始</view>
-  <view class="notice">采用 B 当前八道基础题的展示配置。MVP 探索假设，非专业测评；当前 Mock 不计算个人分数，不生成 AI 评价。偏好表达愿意尝试的方式，不代表六维能力高低。</view>
+  <view class="notice">八道情境题属于 MVP 探索假设，不是专业测评。偏好只影响岗位方向匹配，不代表六维能力高低。</view>
   <block wx:if="{{!ready}}">
     <view class="card"><view class="muted">{{warning}}</view><button class="primary" bindtap="start">开始新的本地体验</button></view>
   </block>
@@ -30,8 +30,8 @@
     <view wx:if="{{validation}}" class="error">{{validation}}</view>
     <view wx:if="{{warning}}" class="error">{{warning}}<button class="secondary" bindtap="retrySave">重试保存</button></view>
     <view class="actions">
-      <button class="primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">完成画像 · 进入 Mock 追问</button>
-      <view class="muted bypass-note">接下来最多两轮预设追问，答案仅保存在本设备。当前不调用 AI。</view>
+      <button class="primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">完成画像 · 进入动态追问</button>
+      <view class="muted bypass-note">接下来最多两轮追问，用于补充行为证据。请勿填写个人隐私。</view>
     </view>
   </block>
 </view>

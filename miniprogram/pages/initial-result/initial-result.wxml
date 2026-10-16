@@ -1,41 +1,41 @@
 <view class="page">
-  <view class="eyebrow">02 / 初步推荐示例</view>
+  <view class="eyebrow">02 / 初步推荐</view>
   <view class="title">三个值得了解的方向</view>
-  <view class="notice">Mock 演示数据，非真实 AI 评估。三个岗位和依据为固定示例，与本次答案无关；不包含匹配分数或个人能力评分。</view>
-  <view class="muted">{{preview ? '当前为示例预览，不创建或修改你的答题进度。' : '已走完画像与两轮 Mock 追问。以下仍是固定示例，未对你的回答进行评价。'}}</view>
+  <view class="notice">{{preview ? '当前为固定示例预览，不创建或修改答题进度。' : '推荐由基础题、偏好和追问证据生成，仅供继续探索，不代表岗位适配度或就业概率。'}}</view>
+  <view class="muted">{{preview ? '预览内容与个人答案无关。' : '已完成画像与两轮追问。'}}</view>
   <view wx:if="{{needsProfile}}" class="card">
     <view class="card-title">请先完成画像与两轮追问</view>
     <view class="muted">主流程需要完整答题与追问记录；首页示例预览独立于答题进度。</view>
     <button class="primary" bindtap="editProfile">前往基础画像</button>
-    <button class="secondary" bindtap="followup">继续 Mock 追问</button>
+    <button class="secondary" bindtap="followup">继续动态追问</button>
   </view>
   <view wx:elif="{{loading}}" class="card">
-    <view class="card-title">正在读取本地演示数据…</view>
-    <view class="muted">{{scenario === 'timeout' ? '正在模拟 15 秒等待，结束后显示固定降级模板。可以返回上一页。' : '这里不调用 AI，也不会上传你的回答。'}}</view>
+    <view class="card-title">正在生成推荐…</view>
+    <view class="muted">AI 不可用时会明确显示降级状态，请勿重复提交。</view>
     <button class="secondary" loading disabled>请稍候</button>
   </view>
   <view wx:elif="{{error}}" class="card">
-    <view class="error">{{error}}</view><button class="primary" bindtap="retry">重试读取正常 Mock</button>
+    <view class="error">{{error}}</view><button class="primary" bindtap="retry">重试生成</button>
   </view>
   <view wx:elif="{{cards.length === 0}}" class="card">
-    <view class="card-title">暂时没有演示推荐</view>
-    <view class="muted">这是空状态演示，不代表你没有适合探索的方向。</view>
-    <button class="primary" bindtap="retry">重新读取正常 Mock</button>
+    <view class="card-title">暂时没有推荐</view>
+    <view class="muted">请检查云端配置或稍后重试。</view>
+    <button class="primary" bindtap="retry">重新生成</button>
   </view>
   <block wx:else>
     <view wx:if="{{statusMessage}}" class="notice">{{statusMessage}}</view>
     <view wx:for="{{cards}}" wx:key="localId" class="card">
-      <view class="badge">固定示例 {{index + 1}} · Mock</view>
+      <view class="badge">推荐方向 {{index + 1}}</view>
       <view class="card-title">{{item.name}}</view>
       <view class="subtitle">{{item.introduction}}</view>
       <view class="reason">{{item.exampleReason}}</view>
       <view class="dimension-list"><text wx:for="{{item.focusDimensions}}" wx:for-item="dimension" wx:key="*this" class="dimension">{{dimension}}</text></view>
       <view class="muted">以上为岗位关注能力，不是你的个人画像。</view>
-      <button class="secondary" data-role="{{item.localId}}" bindtap="trial">体验 4 分钟 Mock 试岗</button>
+      <button class="secondary" data-role="{{item.localId}}" bindtap="trial">体验 4 分钟职业试岗</button>
     </view>
   </block>
   <view wx:if="{{warning}}" class="error">{{warning}}</view>
-  <view wx:if="{{!needsProfile}}" class="card debug-panel">
+  <view wx:if="{{debug && !needsProfile}}" class="card debug-panel">
     <view class="card-title">Mock 状态验收工具</view>
     <view class="muted">仅用于本地 Mock 状态检查。当前场景：{{scenario}}</view>
     <view class="scenario-buttons">
@@ -48,7 +48,7 @@
   </view>
   <view class="actions">
     <button class="secondary" bindtap="editProfile">{{preview ? '开始基础画像' : '修改基础画像'}}</button>
-    <button class="link-button" bindtap="followup">返回 Mock 追问</button>
+    <button class="link-button" bindtap="followup">返回动态追问</button>
     <button class="link-button" bindtap="home">返回首页</button>
   </view>
 </view>

@@ -9,15 +9,14 @@ import type { LocalSession, FrontendResult } from "../models/frontend";
 import { workTrials } from "../mocks/work-trials";
 
 export const v2Availability = {
-  deployed: false,
-  message:
-    "B 的 v2 仍为待联审、未部署提案。推荐、逐题评分、正式事件和公开授权尚不能调用；当前为固定 Mock 演示。",
+  deployed: true,
+  message: "v2 推荐与逐题评分已经接入云函数；公开授权随反馈保存，正式事件使用唯一 eventId。",
 };
 export const PUBLICATION_TEXT_VERSION = "pathai-publication-feedback-20261016-v1";
 export const publicationConsentText =
   "我同意团队将本次反馈经匿名处理后，用于本项目参赛材料和项目展示。不同意不影响提交反馈或使用功能。本同意不包含截图、完整画像或完整试岗回答；撤回方式需上线前由团队提供。";
 export function preferenceAnswers(session: LocalSession) {
-  const options: Record<string, string> = {
+  const options: Record<string, "facts" | "people" | "practice" | "unsure"> = {
     "ui-facts": "facts",
     "ui-people": "people",
     "ui-practice": "practice",

@@ -4,12 +4,7 @@ import { navigate, routes } from "../../utils/navigation";
 import { cloudSession } from "../../services/cloud-session";
 import { cloudAdapter } from "../../services/cloud-adapter";
 import { telemetry } from "../../services/telemetry";
-import {
-  buildFeedbackRequest,
-  blockUnreleasedV2,
-  PUBLICATION_TEXT_VERSION,
-  publicationConsentText,
-} from "../../services/v2-contract";
+import { PUBLICATION_TEXT_VERSION, publicationConsentText } from "../../services/v2-contract";
 
 Page({
   data: {
@@ -72,10 +67,19 @@ Page({
     const analytics = telemetry.status();
     this.setData({ analyticsConsent: analytics.active, analyticsMessage: analytics.message });
   },
-  start() {
+  async start() {
     if (this.data.cloudBusy || this.data.feedbackBusy) return;
     if (!this.data.hasSession) {
       sessionStore.start();
+      if (wx.cloud && !cloudSession.current()) {
+        this.setData({ cloudBusy: true, cloudMessage: "正在创建匿名云端会话…" });
+        const cloudMessage = await cloudSession.connect();
+        this.setData({ cloudBusy: false, cloudMessage });
+        if (!cloudSession.current()) {
+          this.refresh();
+          return;
+        }
+      }
       navigate(routes.profile);
       return;
     }
@@ -171,7 +175,7 @@ Page({
     const session = cloudSession.current();
     if (!session) {
       this.setData({
-        feedbackMessage: "当前为本地 Mock，反馈尚未发送。需先主动创建当前体验的云端联调会话。",
+        feedbackMessage: "尚未建立有效云端会话，反馈未发送。请先创建匿名会话。",
       });
       return;
     }
@@ -183,28 +187,15 @@ Page({
       this.setData({ feedbackMessage: "请先选择 1～5 的帮助度。" });
       return;
     }
-    if (this.data.publicationConsent) {
-      try {
-        const request = buildFeedbackRequest(
-          session.sessionId,
-          this.data.helpfulness as 1 | 2 | 3 | 4 | 5,
-          `【Mock 演示体验反馈】${this.data.feedbackText}`,
-          { granted: true, textVersion: PUBLICATION_TEXT_VERSION },
-        );
-        const response = await blockUnreleasedV2(request);
-        this.setData({
-          feedbackMessage: `${response.message} 本次未发送公开授权或反馈。可取消公开授权，仅提交普通反馈。`,
-        });
-      } catch {
-        this.setData({ feedbackMessage: "反馈格式无效，请勿填写联系方式。" });
-      }
-      return;
-    }
     this.setData({ feedbackBusy: true, feedbackMessage: "" });
     const response = await cloudAdapter.submitFeedback(
       session.sessionId,
       this.data.helpfulness,
-      `【Mock 演示体验反馈】${this.data.feedbackText}`,
+      this.data.feedbackText,
+      {
+        granted: this.data.publicationConsent,
+        textVersion: PUBLICATION_TEXT_VERSION,
+      },
     );
     this.setData({
       feedbackBusy: false,
@@ -220,9 +211,9 @@ Page({
   async connectCloud(): Promise<void> {
     if (this.data.cloudBusy || this.data.feedbackBusy) return;
     wx.showModal({
-      title: "创建开发环境匿名会话？",
+      title: "创建匿名云端会话？",
       content:
-        "将向微信云开发发送版本号以创建匿名会话，并在设备保存删除凭据。不上传画像或试岗回答，主流程仍为 Mock。",
+        "将向当前云环境发送版本号以创建匿名会话，并在设备保存删除凭据。完成画像后，回答会用于生成推荐和试岗结果。请勿输入个人隐私。",
       success: async (result) => {
         if (!result.confirm || this.data.cloudBusy) return;
         this.setData({ cloudBusy: true, cloudMessage: "" });

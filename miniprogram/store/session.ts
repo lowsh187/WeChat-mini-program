@@ -50,6 +50,10 @@ function isFollowup(value: unknown): value is FollowupProgress {
     Array.isArray(value.drafts) &&
     value.drafts.length === 2 &&
     value.drafts.every((draft) => typeof draft === "string" && draft.length <= 800) &&
+    (value.questionIds === undefined ||
+      (Array.isArray(value.questionIds) &&
+        value.questionIds.length <= 2 &&
+        value.questionIds.every((id) => typeof id === "string" && id.length > 0))) &&
     (value.round === 0 || value.round === 1) &&
     typeof value.submittedCount === "number" &&
     Number.isInteger(value.submittedCount) &&
@@ -59,14 +63,14 @@ function isFollowup(value: unknown): value is FollowupProgress {
   );
 }
 function emptyFollowup(): FollowupProgress {
-  return { drafts: ["", ""], round: 0, submittedCount: 0 };
+  return { drafts: ["", ""], questionIds: [], round: 0, submittedCount: 0 };
 }
 
 function isTrialResult(value: unknown, localTrialId: string): value is TrialResultView {
   const dimensions = ["信息提炼", "逻辑分析", "用户洞察", "表达沟通", "执行规划", "创意发散"];
   return (
     isObject(value) &&
-    value.source === "mock" &&
+    (value.source === "mock" || value.source === "cloud") &&
     value.localTrialId === localTrialId &&
     (value.observations === undefined || validObservations(value.observations)) &&
     typeof value.roleName === "string" &&
@@ -74,7 +78,7 @@ function isTrialResult(value: unknown, localTrialId: string): value is TrialResu
     typeof value.exampleAnswer === "string" &&
     value.exampleAnswer.trim().length > 0 &&
     Array.isArray(value.evidence) &&
-    value.evidence.length > 0 &&
+    (value.source === "cloud" || value.evidence.length > 0) &&
     value.evidence.every(
       (item) =>
         isObject(item) &&
@@ -192,7 +196,11 @@ function copy(session: LocalSession): LocalSession {
         }
       : undefined,
     followup: session.followup
-      ? { ...session.followup, drafts: [...session.followup.drafts] }
+      ? {
+          ...session.followup,
+          drafts: [...session.followup.drafts],
+          questionIds: [...(session.followup.questionIds || [])],
+        }
       : emptyFollowup(),
     trial: session.trial
       ? {
@@ -388,6 +396,17 @@ export function createSessionStore(storage: StorageAdapter) {
         session.actionPlan = undefined;
       }
       progress.round = round;
+      session.followup = progress;
+      session.updatedAt = Date.now();
+      persist(session);
+    },
+    saveFollowupQuestion(round: number, questionId: string): void {
+      if ((round !== 0 && round !== 1) || !questionId) throw new Error("追问题目无效");
+      const session = requireSession();
+      const progress = session.followup || emptyFollowup();
+      const questionIds = [...(progress.questionIds || [])];
+      questionIds[round] = questionId;
+      progress.questionIds = questionIds;
       session.followup = progress;
       session.updatedAt = Date.now();
       persist(session);

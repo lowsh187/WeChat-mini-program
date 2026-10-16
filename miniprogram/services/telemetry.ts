@@ -3,7 +3,7 @@ import { sessionStore } from "../store/session";
 import { localStorage } from "../utils/storage";
 import { cloudSession } from "./cloud-session";
 import { createEventLedger } from "./formal-events";
-import { blockUnreleasedV2 } from "./v2-contract";
+import { cloudAdapter } from "./cloud-adapter";
 
 let active = false;
 let localId = "";
@@ -28,16 +28,20 @@ export const telemetry = {
     try {
       const event = createEventLedger(localStorage).enqueue({
         sessionId: credentials.sessionId,
-        mode: "mock",
+        mode: "real",
         eventName,
         step,
         ...((eventName === "trial.started" || eventName === "trial.completed") && session.trial
           ? { trialAttemptId: session.trial.trialAttemptId }
           : {}),
       });
-      // Do not send v2 events to v1, which would ignore IDs/mode and lose idempotency.
-      void blockUnreleasedV2(event);
-      message = "已保存最小化 Mock 事件草稿（eventId/mode/试岗尝试），v2 尚未部署，未发送到云端。";
+      void cloudAdapter.trackFormalEvent(event).then((response) => {
+        message =
+          response.status === "error"
+            ? "匿名事件暂未发送成功，已保留相同 eventId 供重试。"
+            : "匿名步骤事件已记录；不包含画像或回答正文。";
+      });
+      message = "匿名步骤事件正在发送；仅包含事件标识和流程状态。";
     } catch {
       message = "事件草稿保存失败，不影响答题；可关闭事件记录后重试。";
     }

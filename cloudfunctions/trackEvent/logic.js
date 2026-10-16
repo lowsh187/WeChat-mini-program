@@ -1,4 +1,4 @@
-const { createHash } = require("node:crypto");
+const { createHash, randomUUID } = require("node:crypto");
 
 const SAFE_NAME = /^[a-z][a-z0-9_.-]{0,63}$/u;
 function sha256(value) {
@@ -14,6 +14,21 @@ function validateInput(input) {
     return { ok: false, error: "eventName 和 step 必须使用安全的短标识符。" };
   }
   if (
+    input.eventId !== undefined &&
+    (typeof input.eventId !== "string" || !/^evt_[0-9A-Za-z_-]{8,100}$/u.test(input.eventId))
+  ) {
+    return { ok: false, error: "eventId 格式不正确。" };
+  }
+  if (input.mode !== undefined && input.mode !== "mock" && input.mode !== "real") {
+    return { ok: false, error: "mode 必须是 mock 或 real。" };
+  }
+  if (
+    input.trialAttemptId !== undefined &&
+    (typeof input.trialAttemptId !== "string" || input.trialAttemptId.length > 128)
+  ) {
+    return { ok: false, error: "trialAttemptId 格式不正确。" };
+  }
+  if (
     input.durationMs !== undefined &&
     (!Number.isInteger(input.durationMs) || input.durationMs < 0 || input.durationMs > 3600000)
   ) {
@@ -25,6 +40,10 @@ function validateInput(input) {
       sessionId: input.sessionId,
       eventName: input.eventName,
       step: input.step,
+      eventId: input.eventId || `evt_${randomUUID().replaceAll("-", "")}`,
+      mode: input.mode || "real",
+      trialAttemptId: input.trialAttemptId,
+      resultStatus: input.resultStatus,
       durationMs: input.durationMs,
     },
   };

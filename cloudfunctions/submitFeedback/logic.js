@@ -41,6 +41,17 @@ function validateInput(input) {
       return { ok: false, error: "反馈中不得包含手机号或邮箱。", code: "CONTENT_RISK" };
     }
   }
+  if (
+    input.publicationConsent !== undefined &&
+    (!input.publicationConsent ||
+      typeof input.publicationConsent !== "object" ||
+      typeof input.publicationConsent.granted !== "boolean" ||
+      typeof input.publicationConsent.textVersion !== "string" ||
+      input.publicationConsent.textVersion.length < 1 ||
+      input.publicationConsent.textVersion.length > 100)
+  ) {
+    return { ok: false, error: "publicationConsent 格式不正确。" };
+  }
   return {
     ok: true,
     value: {
@@ -48,6 +59,12 @@ function validateInput(input) {
       helpfulness: input.helpfulness,
       interestedRoleId: input.interestedRoleId,
       comment: input.comment?.trim(),
+      publicationConsent: input.publicationConsent
+        ? {
+            granted: input.publicationConsent.granted,
+            textVersion: input.publicationConsent.textVersion,
+          }
+        : { granted: false, textVersion: "legacy-no-publication-consent" },
     },
   };
 }

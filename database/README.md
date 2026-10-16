@@ -14,9 +14,14 @@
 ## 验证
 
 ```powershell
+npm run db:build-imports
 npm run db:validate
 npm run check
 ```
+
+`npm run db:build-imports` 会在 `database/imports/` 生成微信云数据库可直接导入的
+NDJSON 文件（每行一个 JSON 文档）。其中 `work_trials.ndjson` 已将
+`config/rubrics.v2.json` 的 0～5 Rubric 锚点合并到每条正式试岗配置。
 
 ## 【手动配置】在开发环境创建集合
 
@@ -57,17 +62,16 @@ events
 
 在成员 A 审核文案、双方确认权重后：
 
-1. 将 `roles.json` 中的 `roles` 数组导入 `roles`；
-2. 将 `base_questions.json` 中的 `questions` 数组导入 `base_questions`；
-3. 为每条文档补充云数据库时间字段 `createdAt`、`updatedAt`；
-4. 将已审核文档状态从 `draft` 改为 `active`；
-5. 保留 `configVersion: 1.0.0`。
+1. 运行 `npm run db:build-imports`；
+2. 将 `database/imports/roles.ndjson` 导入 `roles`；
+3. 将 `database/imports/base_questions.ndjson` 导入 `base_questions`；
+4. 将 `database/imports/work_trials.ndjson` 导入 `work_trials`；
+5. 导入后核对数量分别为 6、8、3，并保留对应 `configVersion`。
 
 不要把草案直接导入生产环境。生产环境只接受通过联调和内容审核的配置。
 
-## 尚未包含
+## 生产初始化说明
 
-- 三个优先试岗与 Rubric 种子，等待成员 A 的内容输入；
-- 自动导入脚本，等待云端身份与权限方案确认；
-- 数据库实际集合、权限和索引，需在控制台操作并截图留档；
-- 生产环境初始化，候选版验收前不执行。
+三个优先试岗、Rubric、NDJSON 导入文件和空环境自初始化已经包含。生产环境首次调用 `createSession` 时会创建 8 个集合，并仅在配置集合为空时写入 6/8/3 条配置，不覆盖已有数据。
+
+集合权限和 `indexes.json` 中的索引仍需管理员在控制台核验；尤其是 `sessions.sessionId`、`assessments(sessionId, trialAttemptId)`、`events(sessionId, eventId)` 和 `action_plans.sessionId` 的唯一约束。当前内容仍为 MVP 探索假设，`reviewedByProfessional=false`。

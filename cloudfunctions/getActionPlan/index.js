@@ -44,7 +44,9 @@ exports.main = async (event) => {
       .where({ sessionId: input.sessionId })
       .limit(1)
       .get();
+    const planId = `plan_${sha256(input.sessionId).slice(0, 32)}`;
     const record = {
+      planId,
       sessionId: input.sessionId,
       roleId: input.roleId,
       tasks: plan.items,
@@ -62,7 +64,7 @@ exports.main = async (event) => {
       .update({
         data: { status: "plan_created", currentStep: "action_plan", updatedAt: now },
       });
-    return response("success", plan);
+    return response("success", { ...plan, planId });
   } catch (error) {
     console.error("getActionPlan failed", {
       errorCode:

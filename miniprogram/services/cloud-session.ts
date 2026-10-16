@@ -84,7 +84,7 @@ export const cloudSession = {
       warning ||
       (response.status === "degraded"
         ? response.message
-        : "云端匿名会话已创建；主流程仍为 Mock，未上传画像或试岗回答。")
+        : "云端匿名会话已创建，可以开始真实推荐与试岗流程。")
     );
   },
   retrySave() {
@@ -114,6 +114,6 @@ export const cloudSession = {
     } catch {
       return "云端已确认删除，但本地凭据清理失败，请联系团队清理残留。";
     }
-    return "云端已确认删除成功。你仍可单独清除本地 Mock 记录。";
+    return "云端已确认删除成功。你仍可单独清除本地进度。";
   },
 };

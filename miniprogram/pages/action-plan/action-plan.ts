@@ -98,10 +98,9 @@ Page({
     this.setData({ scenario });
   },
   cloudPlan() {
-    this.setData({
-      error:
-        "云端计划要求真实评分能力差距，但 scoreTrial 云函数尚未实现。已阻止上传 Mock 证据；请继续使用固定演示计划。",
-    });
+    if (this.data.loading) return;
+    this.setData({ plan: null, error: "", scenario: "normal" });
+    void this.load();
   },
   mockPlan() {
     if (this.data.loading) return;

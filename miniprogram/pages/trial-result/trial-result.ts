@@ -3,6 +3,10 @@ import { sessionStore } from "../../store/session";
 import type { TrialResultView } from "../../models/frontend";
 import { dimensionLabels, mockComparison } from "../../mocks/next-steps";
 import { observationCards } from "../../models/observations";
+import { backendContent } from "../../config/backend-content";
+
+const roleName = (roleId: string) =>
+  backendContent.roles.find((role) => role.roleId === roleId)?.name || roleId;
 
 Page({
   data: {
@@ -22,16 +26,43 @@ Page({
   onShow() {
     const { session, warning } = sessionStore.snapshot();
     const trial = session?.trial;
-    const result = trial?.completed && trial.result?.source === "mock" ? trial.result : null;
+    const result = trial?.completed && trial.result ? trial.result : null;
     this.setData({
-      comparison: result ? mockComparison(result, trial?.resultStatus === "degraded") : null,
-      practicePriorities: result
-        ? result.evidence.slice(0, 2).map((item) => ({
-            title: item.dimensionLabel,
-            reason: item.exampleEvidence,
-            suggestion: item.improvement,
-          }))
-        : [],
+      comparison:
+        result?.source === "mock"
+          ? mockComparison(result, trial?.resultStatus === "degraded")
+          : result
+            ? {
+                before: (result.recommendationsBefore || []).map((id, index) => ({
+                  name: roleName(id),
+                  rank: index + 1,
+                })),
+                after: (result.recommendationsAfter || []).map((id, index) => {
+                  const previous = (result.recommendationsBefore || []).indexOf(id);
+                  return {
+                    name: roleName(id),
+                    rank: index + 1,
+                    change:
+                      previous === index
+                        ? "顺序未变"
+                        : previous > index
+                          ? `上升 ${previous - index} 位`
+                          : `下降 ${index - previous} 位`,
+                  };
+                }),
+                explanation: (result.changeExplanation || []).join("；"),
+                evidence: result.evidence[0]?.exampleEvidence || "本次没有有效评分证据",
+              }
+            : null,
+      practicePriorities: result?.practicePriorities
+        ? result.practicePriorities
+        : result
+          ? result.evidence.slice(0, 2).map((item) => ({
+              title: item.dimensionLabel,
+              reason: item.exampleEvidence,
+              suggestion: item.improvement,
+            }))
+          : [],
       dimensions: result?.observations
         ? observationCards(result.observations)
         : result
@@ -48,7 +79,7 @@ Page({
           : [],
     });
     this.setData({
-      result: trial?.completed && trial.result?.source === "mock" ? trial.result : null,
+      result,
       degraded: trial?.resultStatus === "degraded",
       message: trial?.message || "",
       warning,

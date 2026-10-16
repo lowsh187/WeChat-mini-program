@@ -1268,14 +1268,14 @@ async function main() {
     },
   );
   await check(
-    "telemetry requires opt-in, serializes minimal Mock events and stops on new session",
+    "telemetry requires opt-in, sends minimal idempotent real events and stops on new session",
     async () => {
       const { cloudSession } = load("services/cloud-session");
       const { cloudAdapter } = load("services/cloud-adapter");
       const { telemetry } = load("services/telemetry");
       const originalCreate = cloudAdapter.createSession;
       const originalDelete = cloudAdapter.deleteSession;
-      const originalEvent = cloudAdapter.trackEvent;
+      const originalEvent = cloudAdapter.trackFormalEvent;
       const events = [];
       try {
         sessionStore.start();
@@ -1285,7 +1285,7 @@ async function main() {
           return { status: "success", data: credentials, message: "" };
         };
         await cloudSession.connect();
-        cloudAdapter.trackEvent = async (...args) => {
+        cloudAdapter.trackFormalEvent = async (...args) => {
           events.push(args);
           return { status: "success", data: { accepted: true }, message: "" };
         };
@@ -1293,13 +1293,13 @@ async function main() {
         assert.equal(events.length, 0);
         assert.equal(telemetry.start(), true);
         await new Promise((done) => setTimeout(done, 0));
-        assert.equal(events.length, 0);
+        assert.equal(events.length, 1);
         const eventDrafts = device.get("pathai.frontend.events.v2");
         assert.equal(eventDrafts.at(-1).eventName, "session.created");
-        assert.equal(eventDrafts.at(-1).mode, "mock");
+        assert.equal(eventDrafts.at(-1).mode, "real");
         sessionStore.updateProfile("goal", goals[1].id);
         await new Promise((done) => setTimeout(done, 0));
-        assert.equal(events.length, 0);
+        assert.equal(events.length, 1);
         sessionStore.start();
         assert.equal(telemetry.status().active, false);
         cloudAdapter.deleteSession = async () => ({
@@ -1312,7 +1312,7 @@ async function main() {
         telemetry.stop();
         cloudAdapter.createSession = originalCreate;
         cloudAdapter.deleteSession = originalDelete;
-        cloudAdapter.trackEvent = originalEvent;
+        cloudAdapter.trackFormalEvent = originalEvent;
       }
     },
   );
@@ -1378,7 +1378,7 @@ async function main() {
       true,
     );
     plan.cloudPlan();
-    assert.match(plan.data.error, /尚未实现/);
+    assert.equal(plan.data.error, "");
   });
   await check(
     "frontend display config matches B question IDs/options and contains no scoring weights",
@@ -1560,7 +1560,7 @@ async function main() {
     },
   );
   await check(
-    "publication consent defaults false; true is blocked before v1 transport; ordinary feedback remains usable",
+    "publication consent defaults false and is persisted with submitted feedback",
     async () => {
       const { cloudSession } = load("services/cloud-session");
       const { cloudAdapter } = load("services/cloud-adapter");
@@ -1576,19 +1576,19 @@ async function main() {
       const originalCurrent = cloudSession.current;
       const originalSubmit = cloudAdapter.submitFeedback;
       let calls = 0;
+      let submittedConsent;
       try {
         cloudSession.current = () => credentials;
-        cloudAdapter.submitFeedback = async () => {
+        cloudAdapter.submitFeedback = async (...args) => {
           calls++;
+          submittedConsent = args[3];
           return { status: "success", data: { accepted: true }, message: "" };
         };
         home.setData({ helpfulness: 4, feedbackText: "我的测试意见", publicationConsent: true });
         await home.sendFeedback();
-        assert.equal(calls, 0);
-        assert.match(home.data.feedbackMessage, /未发送公开授权/);
-        home.togglePublicationConsent();
-        await home.sendFeedback();
         assert.equal(calls, 1);
+        assert.equal(submittedConsent.granted, true);
+        assert.equal(submittedConsent.textVersion, adapter.PUBLICATION_TEXT_VERSION);
       } finally {
         cloudSession.current = originalCurrent;
         cloudAdapter.submitFeedback = originalSubmit;

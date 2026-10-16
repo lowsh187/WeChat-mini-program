@@ -1,25 +1,25 @@
 <view class="page">
-  <view class="eyebrow">05 / 示例证据</view>
-  <view class="title">看懂证据如何表达</view>
-  <view class="notice">Mock 演示数据，非真实 AI 评估。以下证据来自固定“示例作答”，与你刚才输入的内容无关，不代表你的真实能力。</view>
-  <view wx:if="{{!result}}" class="card"><view class="card-title">当前没有已完成的试岗</view><view class="muted">先完成一个 Mock 试岗，才会记录固定示例结果。</view><button class="primary" bindtap="trial">进入试岗</button></view>
+  <view class="eyebrow">05 / 行为证据</view>
+  <view class="title">查看本次试岗结果</view>
+  <view class="notice">{{result ? result.notice : '尚无结果。AI 辅助内容仅供职业探索参考，不构成专业测评。'}}</view>
+  <view wx:if="{{!result}}" class="card"><view class="card-title">当前没有已完成的试岗</view><view class="muted">先完成一个试岗，才会生成结果。</view><button class="primary" bindtap="trial">进入试岗</button></view>
   <block wx:else>
-    <view class="badge">{{result.roleName}} · Mock 任务已完成</view>
-    <view wx:if="{{degraded}}" class="notice">模拟降级结果：{{message}}</view>
-    <view class="card"><view class="card-title">用于演示的作答</view><view class="subtitle">{{result.exampleAnswer}}</view></view>
+    <view class="badge">{{result.roleName}} · 任务已完成</view>
+    <view wx:if="{{degraded}}" class="notice">降级结果：{{message}}</view>
+    <view class="card"><view class="card-title">结果说明</view><view class="subtitle">{{result.exampleAnswer}}</view></view>
     <view wx:for="{{result.evidence}}" wx:key="dimensionLabel" class="card">
-      <view class="badge">{{item.dimensionLabel}} · 无数值评分</view><view class="card-title">{{item.examplePerformance}}</view>
-      <view class="subtitle">{{item.exampleEvidence}}</view><view class="section-title">改进建议示例</view><view class="subtitle">{{item.improvement}}</view>
+      <view class="badge">{{item.dimensionLabel}}</view><view class="card-title">{{item.examplePerformance}}</view>
+      <view class="subtitle">{{item.exampleEvidence}}</view><view class="section-title">改进建议</view><view class="subtitle">{{item.improvement}}</view>
     </view>
-    <view class="section-title">推荐前后变化 · 固定演示数据</view>
-    <view class="notice">仅展示预设顺序变化，无个性化分数；不代表你的岗位适配度。</view>
+    <view class="section-title">推荐前后变化</view>
+    <view class="notice">顺序变化只用于继续探索，不代表岗位适配度或就业成功率。</view>
     <view class="card"><view class="card-title">试岗前</view><view wx:for="{{comparison.before}}" wx:key="name" class="subtitle">{{item.rank}}. {{item.name}}</view></view>
     <view class="card"><view class="card-title">试岗后</view><view wx:for="{{comparison.after}}" wx:key="name" class="subtitle">{{item.rank}}. {{item.name}} · {{item.change}}</view><view class="muted">{{comparison.explanation}}</view><view class="subtitle">对应固定示例证据：{{comparison.evidence}}</view></view>
-    <view class="section-title">六维能力观察 · 固定示例</view>
-    <view wx:for="{{dimensions}}" wx:key="label" class="card"><view class="card-title">{{item.label}}</view><view class="subtitle">示例表现：{{item.performance}}</view><view class="muted">行为依据：{{item.evidence}}</view><view class="subtitle">待提升与建议：{{item.improvement}}</view></view>
-    <view class="section-title">优先练习方向 · 固定示例</view><view class="muted">最多两项，基于示例证据，不是岗位目标差距，也不是对你的能力判断。</view>
-    <view wx:for="{{practicePriorities}}" wx:key="title" class="card"><view class="card-title">{{item.title}}</view><view class="subtitle">示例依据：{{item.reason}}</view><view class="subtitle">建议：{{item.suggestion}}</view></view>
-    <view class="card"><view class="card-title">把发现变成行动</view><view class="muted">七天职业实验帮助继续验证方向；建议不是职业定论，正式评价需接入 B 的已验证评分接口。</view><button class="secondary" bindtap="recommendation">返回初步推荐示例</button><button class="primary" bindtap="plan">开始七天职业实验</button></view>
+    <view class="section-title">六维能力观察</view>
+    <view wx:for="{{dimensions}}" wx:key="label" class="card"><view class="card-title">{{item.label}}</view><view class="subtitle">表现：{{item.performance}}</view><view class="muted">行为依据：{{item.evidence}}</view><view class="subtitle">待提升与建议：{{item.improvement}}</view></view>
+    <view class="section-title">优先练习方向</view><view class="muted">最多两项，基于本次任务证据；未观察维度不会记作 0 分。</view>
+    <view wx:for="{{practicePriorities}}" wx:key="title" class="card"><view class="card-title">{{item.title}}</view><view class="subtitle">依据：{{item.reason}}</view><view class="subtitle">建议：{{item.suggestion}}</view></view>
+    <view class="card"><view class="card-title">把发现变成行动</view><view class="muted">七天职业实验帮助继续验证方向；建议不是职业定论。</view><button class="secondary" bindtap="recommendation">返回初步推荐</button><button class="primary" bindtap="plan">开始七天职业实验</button></view>
     <button class="primary" bindtap="trial">返回试岗 / 重新试岗</button>
   </block>
   <view wx:if="{{warning}}" class="error">{{warning}}<button class="secondary" bindtap="retrySave">重试保存</button></view>

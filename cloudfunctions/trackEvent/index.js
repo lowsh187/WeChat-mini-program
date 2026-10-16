@@ -37,6 +37,12 @@ exports.main = async (event) => {
       });
     }
     const now = new Date();
+    const existing = await database
+      .collection("events")
+      .where({ sessionId: input.sessionId, eventId: input.eventId })
+      .limit(1)
+      .get();
+    if (existing.data.length > 0) return response("success", { accepted: true });
     await database.collection("events").add({
       data: {
         ...input,

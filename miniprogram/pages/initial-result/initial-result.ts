@@ -53,7 +53,10 @@ Page({
       warning,
     });
     try {
-      const response = await frontendService.getInitialRecommendation(this.data.scenario);
+      const response = await frontendService.getInitialRecommendation(
+        this.data.scenario,
+        this.data.preview,
+      );
       if (request !== this.requestSerial) return;
       const current = sessionStore.snapshot().session;
       if (
@@ -103,8 +106,15 @@ Page({
   },
   trial(event: WechatMiniprogram.TouchEvent) {
     const roleId = event.currentTarget.dataset.role;
-    if (typeof roleId === "string" && this.data.cards.some((card) => card.localId === roleId)) {
+    const available = frontendService.getTrialOptions().some((item) => item.localRoleId === roleId);
+    if (
+      typeof roleId === "string" &&
+      available &&
+      this.data.cards.some((card) => card.localId === roleId)
+    ) {
       navigate(`${routes.workTrial}?role=${encodeURIComponent(roleId)}`);
+    } else if (typeof roleId === "string") {
+      this.setData({ error: "该方向暂未开放模拟试岗，请选择数据分析、产品运营或用户研究。" });
     }
   },
   followup() {

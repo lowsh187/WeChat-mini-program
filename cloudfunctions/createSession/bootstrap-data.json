@@ -1,0 +1,537 @@
+{
+  "roles": [
+    {
+      "roleId": "data_analyst",
+      "name": "数据分析",
+      "description": "通过数据识别异常、解释原因并支持决策。",
+      "capabilityWeights": {
+        "information_extraction": 25,
+        "logical_analysis": 25,
+        "user_insight": 10,
+        "communication": 20,
+        "execution_planning": 10,
+        "creative_ideation": 10
+      },
+      "status": "active",
+      "mvpHypothesis": true,
+      "configVersion": "1.0.0"
+    },
+    {
+      "roleId": "product_operations",
+      "name": "产品运营",
+      "description": "围绕用户和业务目标设计并执行运营方案。",
+      "capabilityWeights": {
+        "information_extraction": 10,
+        "logical_analysis": 10,
+        "user_insight": 25,
+        "communication": 10,
+        "execution_planning": 25,
+        "creative_ideation": 20
+      },
+      "status": "active",
+      "mvpHypothesis": true,
+      "configVersion": "1.0.0"
+    },
+    {
+      "roleId": "user_researcher",
+      "name": "用户研究",
+      "description": "从用户材料中提炼需求、区分事实与假设并设计验证。",
+      "capabilityWeights": {
+        "information_extraction": 25,
+        "logical_analysis": 10,
+        "user_insight": 25,
+        "communication": 20,
+        "execution_planning": 10,
+        "creative_ideation": 10
+      },
+      "status": "active",
+      "mvpHypothesis": true,
+      "configVersion": "1.0.0"
+    },
+    {
+      "roleId": "product_manager",
+      "name": "产品经理",
+      "description": "在用户价值与有限资源之间排序、取舍并定义最小方案。",
+      "capabilityWeights": {
+        "information_extraction": 10,
+        "logical_analysis": 25,
+        "user_insight": 25,
+        "communication": 10,
+        "execution_planning": 20,
+        "creative_ideation": 10
+      },
+      "status": "active",
+      "mvpHypothesis": true,
+      "configVersion": "1.0.0"
+    },
+    {
+      "roleId": "project_manager",
+      "name": "项目管理",
+      "description": "识别阻塞、安排顺序并推动团队同步执行。",
+      "capabilityWeights": {
+        "information_extraction": 10,
+        "logical_analysis": 20,
+        "user_insight": 10,
+        "communication": 25,
+        "execution_planning": 25,
+        "creative_ideation": 10
+      },
+      "status": "active",
+      "mvpHypothesis": true,
+      "configVersion": "1.0.0"
+    },
+    {
+      "roleId": "content_strategist",
+      "name": "内容策划",
+      "description": "理解受众并提出差异化、可落地的内容表达。",
+      "capabilityWeights": {
+        "information_extraction": 10,
+        "logical_analysis": 10,
+        "user_insight": 25,
+        "communication": 20,
+        "execution_planning": 10,
+        "creative_ideation": 25
+      },
+      "status": "active",
+      "mvpHypothesis": true,
+      "configVersion": "1.0.0"
+    }
+  ],
+  "baseQuestions": [
+    {
+      "questionId": "base_information_01",
+      "questionType": "base",
+      "order": 1,
+      "prompt": "面对一页包含多条信息的材料时，你通常先做什么？",
+      "targetDimensions": ["information_extraction"],
+      "options": [
+        {
+          "optionId": "a",
+          "label": "先标记目标、事实和限制",
+          "capabilityScores": {
+            "information_extraction": 5
+          }
+        },
+        {
+          "optionId": "b",
+          "label": "先从头读完再凭印象总结",
+          "capabilityScores": {
+            "information_extraction": 3
+          }
+        },
+        {
+          "optionId": "c",
+          "label": "先找别人给出的结论",
+          "capabilityScores": {
+            "information_extraction": 1
+          }
+        }
+      ],
+      "status": "active",
+      "configVersion": "1.0.0"
+    },
+    {
+      "questionId": "base_logic_01",
+      "questionType": "base",
+      "order": 2,
+      "prompt": "两个指标同时下降时，你更可能如何判断原因？",
+      "targetDimensions": ["logical_analysis"],
+      "options": [
+        {
+          "optionId": "a",
+          "label": "列出多个假设并寻找区分它们的证据",
+          "capabilityScores": {
+            "logical_analysis": 5
+          }
+        },
+        {
+          "optionId": "b",
+          "label": "选择最直观的原因继续推进",
+          "capabilityScores": {
+            "logical_analysis": 3
+          }
+        },
+        {
+          "optionId": "c",
+          "label": "等待更多人给出判断",
+          "capabilityScores": {
+            "logical_analysis": 1
+          }
+        }
+      ],
+      "status": "active",
+      "configVersion": "1.0.0"
+    },
+    {
+      "questionId": "base_user_01",
+      "questionType": "base",
+      "order": 3,
+      "prompt": "用户说“这个功能不好用”时，你最想先确认什么？",
+      "targetDimensions": ["user_insight"],
+      "options": [
+        {
+          "optionId": "a",
+          "label": "具体场景、目标和受阻步骤",
+          "capabilityScores": {
+            "user_insight": 5
+          }
+        },
+        {
+          "optionId": "b",
+          "label": "用户是否喜欢界面样式",
+          "capabilityScores": {
+            "user_insight": 3
+          }
+        },
+        {
+          "optionId": "c",
+          "label": "用户是不是操作错误",
+          "capabilityScores": {
+            "user_insight": 1
+          }
+        }
+      ],
+      "status": "active",
+      "configVersion": "1.0.0"
+    },
+    {
+      "questionId": "base_communication_01",
+      "questionType": "base",
+      "order": 4,
+      "prompt": "向团队同步复杂问题时，你更倾向于怎样表达？",
+      "targetDimensions": ["communication"],
+      "options": [
+        {
+          "optionId": "a",
+          "label": "先给结论，再给证据和下一步",
+          "capabilityScores": {
+            "communication": 5
+          }
+        },
+        {
+          "optionId": "b",
+          "label": "按发现过程逐步叙述",
+          "capabilityScores": {
+            "communication": 3
+          }
+        },
+        {
+          "optionId": "c",
+          "label": "转发全部材料让大家自行判断",
+          "capabilityScores": {
+            "communication": 1
+          }
+        }
+      ],
+      "status": "active",
+      "configVersion": "1.0.0"
+    },
+    {
+      "questionId": "base_execution_01",
+      "questionType": "base",
+      "order": 5,
+      "prompt": "收到一个目标模糊且时间有限的任务时，你通常先做什么？",
+      "targetDimensions": ["execution_planning"],
+      "options": [
+        {
+          "optionId": "a",
+          "label": "确认交付标准并拆出优先步骤",
+          "capabilityScores": {
+            "execution_planning": 5
+          }
+        },
+        {
+          "optionId": "b",
+          "label": "从自己最熟悉的部分开始",
+          "capabilityScores": {
+            "execution_planning": 3
+          }
+        },
+        {
+          "optionId": "c",
+          "label": "等目标完全明确后再开始",
+          "capabilityScores": {
+            "execution_planning": 1
+          }
+        }
+      ],
+      "status": "active",
+      "configVersion": "1.0.0"
+    },
+    {
+      "questionId": "base_creative_01",
+      "questionType": "base",
+      "order": 6,
+      "prompt": "需要为同一目标提出方案时，你通常如何开始？",
+      "targetDimensions": ["creative_ideation"],
+      "options": [
+        {
+          "optionId": "a",
+          "label": "先提出多个差异明显的方向再筛选",
+          "capabilityScores": {
+            "creative_ideation": 5
+          }
+        },
+        {
+          "optionId": "b",
+          "label": "优化已有且最稳妥的方案",
+          "capabilityScores": {
+            "creative_ideation": 3
+          }
+        },
+        {
+          "optionId": "c",
+          "label": "寻找一个模板直接套用",
+          "capabilityScores": {
+            "creative_ideation": 1
+          }
+        }
+      ],
+      "status": "active",
+      "configVersion": "1.0.0"
+    },
+    {
+      "questionId": "base_tradeoff_01",
+      "questionType": "base",
+      "order": 7,
+      "prompt": "资源只够完成三个需求中的一个时，你会怎么做？",
+      "targetDimensions": ["logical_analysis", "execution_planning"],
+      "options": [
+        {
+          "optionId": "a",
+          "label": "按用户价值、成本和风险排序并说明取舍",
+          "capabilityScores": {
+            "logical_analysis": 5,
+            "execution_planning": 5
+          }
+        },
+        {
+          "optionId": "b",
+          "label": "优先选择最快完成的需求",
+          "capabilityScores": {
+            "logical_analysis": 3,
+            "execution_planning": 3
+          }
+        },
+        {
+          "optionId": "c",
+          "label": "由提出需求的人决定",
+          "capabilityScores": {
+            "logical_analysis": 1,
+            "execution_planning": 1
+          }
+        }
+      ],
+      "status": "active",
+      "configVersion": "1.0.0"
+    },
+    {
+      "questionId": "base_evidence_01",
+      "questionType": "base",
+      "order": 8,
+      "prompt": "当自己的判断受到质疑时，你更可能怎样回应？",
+      "targetDimensions": ["communication", "information_extraction"],
+      "options": [
+        {
+          "optionId": "a",
+          "label": "区分事实和假设，并说明还需验证什么",
+          "capabilityScores": {
+            "communication": 5,
+            "information_extraction": 5
+          }
+        },
+        {
+          "optionId": "b",
+          "label": "补充更多细节解释原判断",
+          "capabilityScores": {
+            "communication": 3,
+            "information_extraction": 3
+          }
+        },
+        {
+          "optionId": "c",
+          "label": "改用多数人的意见",
+          "capabilityScores": {
+            "communication": 1,
+            "information_extraction": 1
+          }
+        }
+      ],
+      "status": "active",
+      "configVersion": "1.0.0"
+    }
+  ],
+  "workTrials": [
+    {
+      "trialId": "trial_data_signup_drop_v1",
+      "roleId": "data_analyst",
+      "legacyUiId": "ui-trial-data-analyst",
+      "rubricDimensions": ["information_extraction", "logical_analysis", "communication"],
+      "questions": [
+        {
+          "questionId": "data_signup_facts",
+          "required": true,
+          "prompt": "请从材料中列出最关键的事实与异常。"
+        },
+        {
+          "questionId": "data_signup_hypotheses",
+          "required": true,
+          "prompt": "请提出可能原因并说明支持或反对证据。"
+        },
+        {
+          "questionId": "data_signup_next_step",
+          "required": true,
+          "prompt": "请给出下一步验证方案和判断标准。"
+        },
+        {
+          "questionId": "data_signup_summary",
+          "required": false,
+          "prompt": "请用三句话向团队总结。"
+        }
+      ],
+      "status": "active",
+      "configVersion": "2.0.0",
+      "reviewedByProfessional": false,
+      "anchors": {
+        "information_extraction": [
+          "未提取相关信息",
+          "仅复述零散信息",
+          "识别少量事实但遗漏关键限制",
+          "提取主要事实与限制",
+          "结构化提取并区分事实与假设",
+          "完整提取、排序并说明信息间关系"
+        ],
+        "logical_analysis": [
+          "没有形成可检验判断",
+          "结论与证据明显脱节",
+          "提出单一判断且证据有限",
+          "提出合理判断并引用主要证据",
+          "比较多个假设并说明取舍",
+          "形成完整推理链并主动检验反例"
+        ],
+        "communication": [
+          "回答无法理解或偏离任务",
+          "观点零散且缺少结论",
+          "能表达结论但结构或依据不足",
+          "结论、依据和行动基本清楚",
+          "结构清晰并针对受众组织信息",
+          "简洁准确且能预判疑问与风险"
+        ]
+      }
+    },
+    {
+      "trialId": "trial_operations_reading_event_v1",
+      "roleId": "product_operations",
+      "legacyUiId": "ui-trial-product-operations",
+      "rubricDimensions": ["user_insight", "execution_planning", "creative_ideation"],
+      "questions": [
+        {
+          "questionId": "ops_event_goal",
+          "required": true,
+          "prompt": "请明确活动目标与目标用户。"
+        },
+        {
+          "questionId": "ops_event_plan",
+          "required": true,
+          "prompt": "请设计一个可执行的活动方案。"
+        },
+        {
+          "questionId": "ops_event_metric",
+          "required": true,
+          "prompt": "请定义关键指标和复盘方式。"
+        },
+        {
+          "questionId": "ops_event_risk",
+          "required": false,
+          "prompt": "请补充一个主要风险及预案。"
+        }
+      ],
+      "status": "active",
+      "configVersion": "2.0.0",
+      "reviewedByProfessional": false,
+      "anchors": {
+        "user_insight": [
+          "没有识别用户目标或场景",
+          "用主观标签替代用户证据",
+          "识别表层诉求",
+          "结合场景解释主要诉求",
+          "区分诉求、动机与约束",
+          "基于多条证据提出可验证洞察"
+        ],
+        "execution_planning": [
+          "没有可执行步骤",
+          "步骤与目标无明显关联",
+          "有步骤但缺少顺序或验收",
+          "步骤、顺序和基本验收明确",
+          "包含优先级、责任与风险处理",
+          "形成可落地闭环并设置验证与调整机制"
+        ],
+        "creative_ideation": [
+          "没有提出方案",
+          "方案照搬材料且不可执行",
+          "提出单一常规方案",
+          "提出可执行方案并有一定变化",
+          "提出多个差异化方案并比较",
+          "方案新颖、可执行且能说明验证方式"
+        ]
+      }
+    },
+    {
+      "trialId": "trial_research_study_room_v1",
+      "roleId": "user_researcher",
+      "legacyUiId": "ui-trial-user-researcher",
+      "rubricDimensions": ["information_extraction", "user_insight", "communication"],
+      "questions": [
+        {
+          "questionId": "research_room_signal",
+          "required": true,
+          "prompt": "请区分材料中的事实、观点与未知信息。"
+        },
+        {
+          "questionId": "research_room_insight",
+          "required": true,
+          "prompt": "请提出一个用户洞察并引用证据。"
+        },
+        {
+          "questionId": "research_room_validation",
+          "required": true,
+          "prompt": "请设计下一步访谈或验证问题。"
+        },
+        {
+          "questionId": "research_room_summary",
+          "required": false,
+          "prompt": "请向产品团队简要说明研究结论。"
+        }
+      ],
+      "status": "active",
+      "configVersion": "2.0.0",
+      "reviewedByProfessional": false,
+      "anchors": {
+        "information_extraction": [
+          "未提取相关信息",
+          "仅复述零散信息",
+          "识别少量事实但遗漏关键限制",
+          "提取主要事实与限制",
+          "结构化提取并区分事实与假设",
+          "完整提取、排序并说明信息间关系"
+        ],
+        "user_insight": [
+          "没有识别用户目标或场景",
+          "用主观标签替代用户证据",
+          "识别表层诉求",
+          "结合场景解释主要诉求",
+          "区分诉求、动机与约束",
+          "基于多条证据提出可验证洞察"
+        ],
+        "communication": [
+          "回答无法理解或偏离任务",
+          "观点零散且缺少结论",
+          "能表达结论但结构或依据不足",
+          "结论、依据和行动基本清楚",
+          "结构清晰并针对受众组织信息",
+          "简洁准确且能预判疑问与风险"
+        ]
+      }
+    }
+  ]
+}

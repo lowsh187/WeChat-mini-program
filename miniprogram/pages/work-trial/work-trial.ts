@@ -4,6 +4,7 @@ import { isFollowupComplete, sessionStore } from "../../store/session";
 import { navigate, routes } from "../../utils/navigation";
 import { trialClock } from "../../utils/trial-clock";
 import { buildTrialRequest } from "../../services/v2-contract";
+import { cloudSession } from "../../services/cloud-session";
 
 Page({
   requestSerial: 0,
@@ -184,7 +185,8 @@ Page({
     const request = ++this.requestSerial;
     this.setData({ submitting: true, submissionError: "", validation: "", message: "" });
     try {
-      const payload = buildTrialRequest(session.localId, session);
+      const credentials = wx.cloud ? cloudSession.current() : null;
+      const payload = buildTrialRequest(credentials?.sessionId || session.localId, session);
       const response = await frontendService.submitTrial(
         trial.localTrialId,
         this.data.scenario,

@@ -110,19 +110,36 @@ exports.main = async (event) => {
       missingComponents: followup ? [] : ["followup"],
       comparableToFullScore: !combined.degraded,
     };
-    await database.collection("assessments").add({
-      data: {
+    const assessmentRecord = {
+      sessionId: validation.value.sessionId,
+      assessmentType: "initial",
+      capabilityObservations,
+      recommendations,
+      resultStatus: status,
+      aiGenerated,
+      configVersion: "2.0.0",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const previousInitial = await database
+      .collection("assessments")
+      .where({
         sessionId: validation.value.sessionId,
         assessmentType: "initial",
-        capabilityObservations,
-        recommendations,
-        resultStatus: status,
-        aiGenerated,
         configVersion: "2.0.0",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
+      })
+      .limit(1)
+      .get();
+    if (previousInitial.data[0]) {
+      const updatedRecord = { ...assessmentRecord };
+      delete updatedRecord.createdAt;
+      await database
+        .collection("assessments")
+        .doc(previousInitial.data[0]._id)
+        .update({ data: updatedRecord });
+    } else {
+      await database.collection("assessments").add({ data: assessmentRecord });
+    }
     return response(status, publicResult, degradedError, aiGenerated);
   } catch (error) {
     console.error("getInitialRecommendation failed", {
