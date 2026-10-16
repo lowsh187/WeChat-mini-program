@@ -1,0 +1,118 @@
+page {
+  background: #f6f7f2;
+  color: #202c2a;
+  font-size: 28rpx;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.page {
+  padding: 36rpx 32rpx 64rpx;
+  padding-bottom: calc(64rpx + env(safe-area-inset-bottom));
+}
+.eyebrow {
+  color: #357567;
+  font-size: 23rpx;
+  letter-spacing: 3rpx;
+  margin-bottom: 16rpx;
+}
+.title {
+  font-size: 48rpx;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 20rpx;
+}
+.subtitle {
+  color: #61716c;
+  line-height: 1.8;
+}
+.card {
+  padding: 30rpx;
+  margin-top: 24rpx;
+  border: 1rpx solid #e3e8df;
+  border-radius: 24rpx;
+  background: #fff;
+}
+.card-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+.notice {
+  background: #eef3df;
+  border-radius: 16rpx;
+  padding: 22rpx;
+  color: #50623c;
+  font-size: 24rpx;
+  line-height: 1.7;
+  margin: 24rpx 0;
+}
+.muted {
+  color: #6b7873;
+  font-size: 24rpx;
+  line-height: 1.7;
+}
+.error {
+  color: #963f32;
+  background: #fff1eb;
+  padding: 22rpx;
+  border-radius: 16rpx;
+  margin-top: 20rpx;
+  line-height: 1.7;
+}
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin: 32rpx 0 16rpx;
+}
+button {
+  font-size: 28rpx;
+  border-radius: 16rpx;
+  margin-top: 20rpx;
+}
+button::after {
+  border: none;
+}
+.primary {
+  background: #276b5b;
+  color: #fff;
+}
+.secondary {
+  background: #e8eee7;
+  color: #31574b;
+}
+.link-button {
+  background: transparent;
+  color: #357567;
+  font-size: 25rpx;
+}
+.badge {
+  display: inline-block;
+  font-size: 22rpx;
+  color: #52613c;
+  background: #edf3df;
+  border-radius: 10rpx;
+  padding: 6rpx 14rpx;
+  margin-bottom: 16rpx;
+}
+.actions {
+  margin-top: 32rpx;
+}
+.answer {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 220rpx;
+  padding: 22rpx;
+  margin: 24rpx 0;
+  background: #f4f6f0;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+}
+.scenario-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+.scenario-buttons button {
+  margin: 16rpx 0 0;
+  font-size: 23rpx;
+}

@@ -27,3 +27,11 @@ Thumbs.db
 
 # Local API client data
 .postman/
+
+# Frontend DevTools output and local-only configuration
+miniprogram/**/*.js
+miniprogram/**/*.js.map
+miniprogram/miniprogram_npm/
+project.local.config.json
+.check-build/
+*.tsbuildinfo

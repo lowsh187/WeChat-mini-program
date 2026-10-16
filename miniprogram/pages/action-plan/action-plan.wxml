@@ -1,0 +1,22 @@
+<view class="page">
+  <view class="eyebrow">06 / 七天职业实验</view><view class="title">用行动继续验证方向</view>
+  <view class="notice">当前主流程为 Mock，计划为固定演示模板，不是 AI 对你的能力诊断。云端计划需真实评分证据，待评分接口完成后联调。</view>
+  <view wx:if="{{!ready}}" class="card"><view class="card-title">先完成一次试岗</view><button class="primary" bindtap="trial">进入职业试岗</button></view>
+  <view wx:if="{{loading}}" class="notice">正在读取计划，请稍候…</view>
+  <view wx:if="{{error}}" class="error">{{error}}<button bindtap="retry" disabled="{{loading}}">重试</button><button bindtap="fallback" disabled="{{loading}}">使用固定模板降级</button></view>
+  <view wx:if="{{message}}" class="notice">{{message}}</view>
+  <block wx:if="{{plan}}">
+    <view class="badge">{{plan.roleName}} · {{plan.source === 'mock' ? '固定演示数据' : '云端模板'}}</view>
+    <view class="muted">{{plan.notice}}</view><view class="section-title">已完成 {{completedCount}} / 7 天</view>
+    <progress percent="{{completedCount * 100 / 7}}" activeColor="#276b5b" />
+    <view wx:for="{{plan.items}}" wx:key="day" class="card">
+      <view class="card-title">第 {{item.day}} 天 · {{item.title}}</view>
+      <button class="link-button" data-day="{{item.day}}" bindtap="detail">{{expandedDay === item.day ? '收起任务说明' : '查看任务说明'}}</button>
+      <view wx:if="{{expandedDay === item.day}}" class="subtitle">{{item.description}}</view>
+      <button class="{{item.completed ? 'secondary' : 'primary'}}" data-day="{{item.day}}" bindtap="toggle">{{item.completed ? '已完成 ✓ · 点击取消' : '标记完成'}}</button>
+    </view>
+  </block>
+  <view wx:if="{{ready}}" class="card"><button class="link-button" bindtap="cloudPlan">查看云端计划接入状态</button><view class="muted">Mock 验收工具：当前 {{scenario}}。失败时保留已有计划；成功替换会重置勾选。</view><view class="scenario-buttons"><button data-scenario="normal" bindtap="simulate">正常</button><button data-scenario="empty" bindtap="simulate">空</button><button data-scenario="error" bindtap="simulate">错误</button><button data-scenario="timeout" bindtap="simulate">15 秒超时</button><button data-scenario="degraded" bindtap="simulate">降级</button></view><button class="link-button" bindtap="mockPlan" disabled="{{loading}}">按场景重新读取固定模板</button></view>
+  <view wx:if="{{warning}}" class="error">{{warning}}<button bindtap="retrySave">重试保存</button></view>
+  <button class="secondary" bindtap="result">返回行为证据与推荐变化</button><button class="link-button" bindtap="home">返回首页</button>
+</view>

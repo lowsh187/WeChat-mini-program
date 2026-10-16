@@ -1,0 +1,27 @@
+<view class="page">
+  <view class="eyebrow">02 / 预设追问</view>
+  <view class="title">再说说你的做法</view>
+  <view class="notice">Mock 演示 · 固定预设题库，最多两轮。未调用 AI，不计算个人能力。问题 ID 与文案是前端草案。</view>
+  <view wx:if="{{!ready}}" class="card"><view class="muted">请先完成基础画像。</view><button class="primary" bindtap="profile">前往基础画像</button></view>
+  <view wx:elif="{{completed}}" class="card"><view class="card-title">两轮 Mock 追问已完成</view><button class="primary" bindtap="result">查看初步推荐示例</button><button class="secondary" bindtap="edit">修改追问回答</button></view>
+  <block wx:else>
+    <view class="section-title">第 {{round + 1}} / 2 轮</view>
+    <view wx:if="{{loading}}" class="card"><view>正在读取预设问题…</view><view class="muted">{{scenario === 'timeout' ? '模拟 15 秒等待后降级到固定模板。' : '回答仅保存在当前设备。'}}</view><button loading disabled>请稍候</button></view>
+    <view wx:elif="{{error}}" class="error">{{error}}<button class="secondary" bindtap="retry">重试</button></view>
+    <view wx:elif="{{!question}}" class="card"><view>暂时没有追问题目</view><button class="secondary" bindtap="retry">重试读取题库</button></view>
+    <view wx:else class="card">
+      <view wx:if="{{message}}" class="notice">{{message}}</view>
+      <view class="badge">预设维度：{{question.dimensionLabel}} · 非评分</view>
+      <view class="card-title">{{question.title}}</view><view class="subtitle">{{question.prompt}}</view>
+      <textarea class="answer" value="{{answer}}" maxlength="800" disabled="{{submitting}}" bindinput="input" placeholder="写下你的做法或一个小例子（最多 800 字）" />
+      <view class="muted">{{answer.length}} / 800 · 本地草稿自动保存</view>
+      <button class="primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">提交本轮回答</button>
+      <button wx:if="{{round > 0}}" class="secondary" bindtap="previous">返回上一轮</button>
+      <button wx:if="{{canNextSaved}}" class="secondary" bindtap="nextSaved">查看已保存的下一轮</button>
+      <view wx:if="{{validation}}" class="error">{{validation}}</view>
+    </view>
+    <view class="card"><view class="muted">Mock 状态验收</view><view class="scenario-buttons"><button wx:for="{{['normal','empty','error','degraded','timeout']}}" wx:key="*this" class="secondary" disabled="{{loading || submitting}}" data-scenario="{{item}}" bindtap="simulate">{{item}}</button></view></view>
+  </block>
+  <view wx:if="{{warning}}" class="error">{{warning}}<button class="secondary" bindtap="retrySave">重试保存</button></view>
+  <button class="link-button" bindtap="profile">返回基础画像</button><button class="link-button" bindtap="home">返回首页</button>
+</view>
