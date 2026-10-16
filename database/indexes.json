@@ -61,6 +61,14 @@
     ],
     "assessments": [
       {
+        "name": "assessment_session_attempt_unique",
+        "unique": true,
+        "fields": [
+          { "field": "sessionId", "order": "asc" },
+          { "field": "trialAttemptId", "order": "asc" }
+        ]
+      },
+      {
         "name": "assessment_session_created",
         "unique": false,
         "fields": [
@@ -70,6 +78,11 @@
       }
     ],
     "action_plans": [
+      {
+        "name": "action_plan_id_unique",
+        "unique": true,
+        "fields": [{ "field": "planId", "order": "asc" }]
+      },
       {
         "name": "action_plan_session_unique",
         "unique": true,
@@ -92,6 +105,14 @@
       }
     ],
     "events": [
+      {
+        "name": "event_session_event_id_unique",
+        "unique": true,
+        "fields": [
+          { "field": "sessionId", "order": "asc" },
+          { "field": "eventId", "order": "asc" }
+        ]
+      },
       {
         "name": "event_session_name_created",
         "unique": false,
