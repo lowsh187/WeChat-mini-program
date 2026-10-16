@@ -9,13 +9,16 @@
   },
   "scripts": {
     "db:validate": "node scripts/validate-database.mjs",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test tests/*.test.mjs && npm run test:frontend",
+    "test:frontend": "node scripts/test-logic.cjs",
+    "check:frontend": "node scripts/sync-frontend-config.mjs --check && node scripts/check-structure.cjs",
+    "sync:frontend": "node scripts/sync-frontend-config.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "metrics:summarize": "node scripts/summarize-metrics.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run db:validate && npm test && npm run typecheck && npm run lint && npm run format:check"
+    "check": "npm run db:validate && npm test && npm run typecheck && npm run check:frontend && npm run lint && npm run format:check"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

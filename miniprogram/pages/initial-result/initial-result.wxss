@@ -1,0 +1,34 @@
+@import "../../styles/frontend.wxss";
+.reason {
+  margin: 24rpx 0;
+  padding: 20rpx;
+  border-left: 6rpx solid #b4c792;
+  background: #f7f8f1;
+  font-size: 25rpx;
+  line-height: 1.8;
+}
+.dimension-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin: 18rpx 0;
+}
+.dimension {
+  padding: 8rpx 14rpx;
+  background: #edf2eb;
+  border-radius: 10rpx;
+  font-size: 23rpx;
+  color: #41614f;
+}
+.scenario-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+.scenario-buttons button {
+  margin: 16rpx 0 0;
+  font-size: 24rpx;
+}
+.debug-panel {
+  border-style: dashed;
+}

@@ -1,0 +1,2 @@
+@import "../../styles/frontend.wxss";
+/* Shared placeholder styles are defined in app.wxss. */
