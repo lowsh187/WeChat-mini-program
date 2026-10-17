@@ -20,10 +20,11 @@
     <view class="card materials"><view class="card-title">工作材料 · 虚构示例</view><view wx:for="{{definition.materials}}" wx:key="label" class="material"><view class="material-label">{{item.label}}</view><view>{{item.content}}</view></view></view>
     <view wx:for="{{answerFields}}" wx:key="localId" class="card">
       <view class="card-title">{{index + 1}}. {{item.label}}</view>
-      <textarea class="answer" value="{{item.answer}}" maxlength="1200" placeholder="{{item.placeholder}}" data-field="{{item.localId}}" disabled="{{!started || submitting || completed}}" bindinput="input" />
-      <view class="muted">必填 · {{item.answer.length}} / 1200</view>
+      <view class="input-guide">按任务要求写清要点即可，可以分条回答，无需写成长文。</view>
+      <textarea class="answer" value="{{item.answer}}" maxlength="1200" placeholder="{{item.placeholder}}" data-field="{{item.localId}}" disabled="{{!started || submitting || completed}}" bindinput="input" cursor-spacing="24" adjust-position="{{true}}" show-confirm-bar="{{true}}" />
+      <view class="muted input-meta">必填 · {{item.answer.length}} / 1200，上限不是最低要求 · 草稿保存在本设备</view>
     </view>
-    <view wx:if="{{started}}" class="card"><view class="card-title">可选补充 · 预设追问</view><view class="muted">{{definition.supplementaryPrompt}}此问题固定，不由 AI 生成。</view><textarea class="answer" value="{{supplementaryAnswer}}" maxlength="1200" data-field="ui-supplement" disabled="{{submitting || completed}}" bindinput="input" placeholder="可留空" /></view>
+    <view wx:if="{{started}}" class="card"><view class="card-title">可选补充 · 预设追问</view><view class="muted">{{definition.supplementaryPrompt}}此问题固定，不由 AI 生成。</view><textarea class="answer" value="{{supplementaryAnswer}}" maxlength="1200" data-field="ui-supplement" disabled="{{submitting || completed}}" bindinput="input" cursor-spacing="24" adjust-position="{{true}}" show-confirm-bar="{{true}}" placeholder="有补充再写，可以留空" /><view class="muted input-meta">可选 · {{supplementaryAnswer.length}} / 1200 · 草稿保存在本设备</view></view>
     <view wx:if="{{validation}}" class="error">{{validation}}</view>
     <view wx:if="{{submissionError}}" class="error">{{submissionError}}<button class="secondary" bindtap="retrySubmit">重试提交</button></view>
     <view wx:if="{{message}}" class="notice">{{message}}</view>

@@ -1,0 +1,28 @@
+/* Opt-in presentation; limits and synchronous draft persistence stay unchanged. */
+.answer {
+  display: block;
+  width: 100%;
+  height: 300rpx;
+  min-height: 240rpx;
+  padding: 20rpx;
+  margin: 18rpx 0 10rpx;
+  border: 1rpx solid #dce4d8;
+  line-height: 1.65;
+  font-size: 30rpx;
+}
+.input-guide {
+  color: #61716c;
+  font-size: 25rpx;
+  line-height: 1.7;
+  overflow-wrap: break-word;
+}
+.input-meta {
+  font-size: 23rpx;
+  line-height: 1.6;
+  margin-bottom: 12rpx;
+}
+@media (max-width: 360px) {
+  .answer {
+    height: 280rpx;
+  }
+}

@@ -1,16 +1,91 @@
 @import "../../styles/frontend.wxss";
-.saved {
-  margin-top: 24rpx;
-  color: #357567;
-  text-align: center;
-  font-size: 25rpx;
+@import "../../styles/text-input.wxss";
+.home {
+  padding-top: 40rpx;
 }
-.flow-item {
-  padding: 14rpx 0;
-  line-height: 1.7;
-  font-size: 25rpx;
+.home .title {
+  font-size: 44rpx;
+  margin-bottom: 12rpx;
+}
+.home .subtitle {
+  line-height: 1.65;
+}
+.exploration {
+  margin-top: 32rpx;
+  padding: 28rpx;
+}
+.journey {
+  display: flex;
+  justify-content: space-between;
+  margin: 28rpx 0;
+}
+.journey-step {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  color: #6b7873;
+  font-size: 23rpx;
+}
+.step-mark {
+  width: 42rpx;
+  height: 42rpx;
+  line-height: 42rpx;
+  border-radius: 50%;
+  background: #edf0e8;
+  margin: 0 auto 10rpx;
+}
+.current {
+  color: #276b5b;
+  font-weight: 600;
+}
+.current .step-mark {
+  background: #276b5b;
+  color: #fff;
+}
+.complete .step-mark {
+  background: #e8eee7;
+  color: #276b5b;
+}
+.data-note,
+.ai-note {
+  margin-top: 20rpx;
+  font-size: 23rpx;
+}
+.utility-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 16rpx;
+}
+.utility-links button {
+  margin: 0;
+  padding: 12rpx 16rpx;
+  line-height: 1.6;
+}
+.home .muted,
+.home .notice,
+.home .error {
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 .footer {
   text-align: center;
-  margin-top: 36rpx;
+  margin-top: 28rpx;
+  font-size: 22rpx;
+}
+.settings-toggle {
+  width: 100%;
+  margin: 12rpx 0 0;
+  padding: 18rpx 0;
+  text-align: left;
+  line-height: 1.6;
+  border-top: 1rpx solid #edf0e8;
+  border-radius: 0;
+}
+.settings .secondary {
+  width: 100%;
+  white-space: normal;
+  line-height: 1.6;
+  padding: 18rpx;
+  margin: 16rpx 0;
 }

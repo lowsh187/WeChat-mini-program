@@ -1,4 +1,5 @@
 @import "../../styles/frontend.wxss";
+@import "../../styles/text-input.wxss";
 .materials {
   padding: 24rpx;
 }

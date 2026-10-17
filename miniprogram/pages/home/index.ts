@@ -5,9 +5,25 @@ import { cloudSession } from "../../services/cloud-session";
 import { cloudAdapter } from "../../services/cloud-adapter";
 import { telemetry } from "../../services/telemetry";
 import { PUBLICATION_TEXT_VERSION, publicationConsentText } from "../../services/v2-contract";
+import { homeProgress } from "../../utils/home-progress";
+
+// Presentation only: service state, credentials and request payloads are unchanged.
+function userMessage(message: string): string {
+  return message
+    .replace(/删除凭据/g, "删除记录所需的信息")
+    .replace(/凭据/g, "本机保存的信息")
+    .replace(/匿名联调会话|匿名云端会话|云端匿名会话|云端会话/g, "服务连接")
+    .replace(/会话/g, "体验")
+    .replace(/eventId/g, "记录标识")
+    .replace(/联调/g, "连接")
+    .replace(/联系 B/g, "联系团队");
+}
 
 Page({
   data: {
+    ...homeProgress(null, baseQuestions.length),
+    cloudNeedsAttention: false,
+    canRetryConnection: false,
     hasSession: false,
     answeredCount: 0,
     total: baseQuestions.length,
@@ -20,6 +36,8 @@ Page({
     publicationTextVersion: PUBLICATION_TEXT_VERSION,
     feedbackSessionId: "",
     privacyVisible: false,
+    analyticsDetailsVisible: false,
+    recordsVisible: false,
     feedbackVisible: false,
     feedbackText: "",
     helpfulness: 0,
@@ -52,27 +70,34 @@ Page({
         feedbackMessage: "",
       });
     this.setData({
+      ...homeProgress(session, baseQuestions.length),
       hasSession: !!session,
       answeredCount: session ? Object.keys(session.answers).length : 0,
-      warning,
+      warning: userMessage(warning),
       canContinue: !!session,
     });
     const status = cloudSession.status();
     this.setData({
       cloudConnected: status.connected,
       cloudPending: status.pending,
-      cloudWarning: status.warning,
+      cloudWarning: userMessage(status.warning),
+      cloudMessage: userMessage(this.data.cloudMessage),
       cloudLinked: status.linked,
+      cloudNeedsAttention: !!session && !!wx.cloud && !cloudSession.current(),
+      canRetryConnection: !!session && !status.connected && !status.pending && !status.warning,
     });
     const analytics = telemetry.status();
-    this.setData({ analyticsConsent: analytics.active, analyticsMessage: analytics.message });
+    this.setData({
+      analyticsConsent: analytics.active,
+      analyticsMessage: userMessage(analytics.message),
+    });
   },
   async start() {
     if (this.data.cloudBusy || this.data.feedbackBusy) return;
     if (!this.data.hasSession) {
       sessionStore.start();
       if (wx.cloud && !cloudSession.current()) {
-        this.setData({ cloudBusy: true, cloudMessage: "正在创建匿名云端会话…" });
+        this.setData({ cloudBusy: true, cloudMessage: "正在连接探索服务…" });
         const cloudMessage = await cloudSession.connect();
         this.setData({ cloudBusy: false, cloudMessage });
         if (!cloudSession.current()) {
@@ -126,7 +151,7 @@ Page({
     if (this.data.cloudBusy || this.data.feedbackBusy) return;
     wx.showModal({
       title: "清除本地记录？",
-      content: "清除此设备的画像、回答、试岗与计划勾选。云端记录须另行删除；删除凭据将保留。",
+      content: "清除此设备的画像、回答、试岗与计划勾选。云端记录不会同步删除。",
       success: (result) => {
         if (!result.confirm) return;
         const cleared = sessionStore.clear();
@@ -137,10 +162,33 @@ Page({
     });
   },
   privacy() {
-    this.setData({ privacyVisible: !this.data.privacyVisible });
+    this.setData({
+      privacyVisible: !this.data.privacyVisible,
+      analyticsDetailsVisible: false,
+      recordsVisible: false,
+      feedbackVisible: false,
+    });
+  },
+  toggleAnalyticsDetails() {
+    this.setData({
+      analyticsDetailsVisible: !this.data.analyticsDetailsVisible,
+      recordsVisible: false,
+      feedbackVisible: false,
+    });
+  },
+  toggleRecords() {
+    this.setData({
+      recordsVisible: !this.data.recordsVisible,
+      analyticsDetailsVisible: false,
+      feedbackVisible: false,
+    });
   },
   feedback() {
-    this.setData({ feedbackVisible: !this.data.feedbackVisible });
+    this.setData({
+      feedbackVisible: !this.data.feedbackVisible,
+      analyticsDetailsVisible: false,
+      recordsVisible: false,
+    });
   },
   feedbackInput(event: WechatMiniprogram.Input) {
     this.setData({
@@ -175,7 +223,7 @@ Page({
     const session = cloudSession.current();
     if (!session) {
       this.setData({
-        feedbackMessage: "尚未建立有效云端会话，反馈未发送。请先创建匿名会话。",
+        feedbackMessage: "尚未连接服务，反馈未发送。请先开始探索或重试连接。",
       });
       return;
     }
@@ -205,15 +253,15 @@ Page({
       feedbackMessage:
         response.status === "success"
           ? "云端已确认接收反馈。"
-          : response.message || "尚未确认接收，请联系团队核实。",
+          : userMessage(response.message) || "尚未确认接收，请联系团队核实。",
     });
   },
   async connectCloud(): Promise<void> {
     if (this.data.cloudBusy || this.data.feedbackBusy) return;
     wx.showModal({
-      title: "创建匿名云端会话？",
+      title: "重新连接服务？",
       content:
-        "将向当前云环境发送版本号以创建匿名会话，并在设备保存删除凭据。完成画像后，回答会用于生成推荐和试岗结果。请勿输入个人隐私。",
+        "将发送应用版本信息并连接探索服务，在本机保存管理记录所需的信息。完成画像后，必要回答会用于生成推荐和试岗结果。请勿输入个人隐私。",
       success: async (result) => {
         if (!result.confirm || this.data.cloudBusy) return;
         this.setData({ cloudBusy: true, cloudMessage: "" });
@@ -230,9 +278,9 @@ Page({
   deleteCloud() {
     if (this.data.cloudBusy || this.data.feedbackBusy) return;
     wx.showModal({
-      title: "删除云端匿名记录？",
+      title: "删除云端探索记录？",
       content:
-        "将请求服务器删除该匿名会话关联的评分、计划、反馈和事件。只有服务器确认后才显示成功。",
+        "将请求服务器删除本次探索关联的评分、计划、反馈和使用统计。只有服务器确认后才显示成功。",
       success: async (result) => {
         if (!result.confirm || this.data.cloudBusy || this.data.feedbackBusy) return;
         this.setData({ cloudBusy: true, cloudMessage: "" });
@@ -255,6 +303,9 @@ Page({
     if (telemetry.status().active) telemetry.stop();
     else telemetry.start();
     const status = telemetry.status();
-    this.setData({ analyticsConsent: status.active, analyticsMessage: status.message });
+    this.setData({
+      analyticsConsent: status.active,
+      analyticsMessage: userMessage(status.message),
+    });
   },
 });
