@@ -100,15 +100,19 @@ function homePageForSettings(options = {}) {
   let definition;
   const sideEffect = () => assert.fail("Opening settings must not create, delete or opt in");
   let cloudCurrent = options.cloudCurrent || null;
-  let connectCalls = 0;
-  let startCalls = 0;
-  const navigations = [];
-  const localSession = options.localSession || null;
-  const cloudStatus = options.cloudStatus || {
+  let cloudStatus = options.cloudStatus || {
     connected: false,
     pending: true,
     warning: "删除凭据无法读取，请联系 B",
   };
+  let connectCalls = 0;
+  let startCalls = 0;
+  let clearCalls = 0;
+  let deleteCalls = 0;
+  let stopCalls = 0;
+  let modalPromise = Promise.resolve();
+  const navigations = [];
+  let localSession = options.localSession || null;
   const dependencies = {
     "../../mocks/base-questions": { baseQuestions: Array(8).fill({}) },
     "../../utils/home-progress": { homeProgress },
@@ -117,8 +121,15 @@ function homePageForSettings(options = {}) {
         snapshot: () => ({ session: localSession, warning: "" }),
         start: () => {
           startCalls += 1;
+          localSession = { localId: `local-new-${startCalls}`, stage: "profile", answers: {} };
+          return localSession;
         },
-        clear: sideEffect,
+        clear: () => {
+          clearCalls += 1;
+          if (options.clearFails) return false;
+          localSession = null;
+          return true;
+        },
       },
     },
     "../../services/cloud-session": {
@@ -135,6 +146,13 @@ function homePageForSettings(options = {}) {
               expiresAt: "2099-01-01T00:00:00.000Z",
             };
           return options.connectMessage || "服务连接已建立";
+        },
+        removeWithResult: async () => {
+          deleteCalls += 1;
+          if (!options.deleteSucceeds) return { removed: false, message: "云端删除失败" };
+          cloudCurrent = null;
+          cloudStatus = { connected: false, pending: false, warning: "" };
+          return { removed: true, message: "云端已确认删除成功" };
         },
         remove: sideEffect,
       },
@@ -155,7 +173,9 @@ function homePageForSettings(options = {}) {
       telemetry: {
         status: () => ({ active: false, message: "请先创建匿名联调会话" }),
         start: sideEffect,
-        stop: sideEffect,
+        stop: () => {
+          stopCalls += 1;
+        },
       },
     },
   };
@@ -170,8 +190,10 @@ function homePageForSettings(options = {}) {
     {
       cloud: {},
       showModal: ({ success }) => {
-        if (options.confirmModal) success({ confirm: true, cancel: false });
+        if (options.confirmModal)
+          modalPromise = Promise.resolve(success({ confirm: true, cancel: false }));
       },
+      showToast() {},
     },
     {},
   );
@@ -184,6 +206,11 @@ function homePageForSettings(options = {}) {
     navigations,
     getConnectCalls: () => connectCalls,
     getStartCalls: () => startCalls,
+    getClearCalls: () => clearCalls,
+    getDeleteCalls: () => deleteCalls,
+    getStopCalls: () => stopCalls,
+    waitForModal: () => modalPromise,
+    getLocalSession: () => localSession,
   };
 }
 
@@ -242,7 +269,7 @@ test("resuming cached local progress reconnects before leaving the homepage", as
   assert.deepEqual(page.navigations, ["profile"]);
 });
 
-test("restart preserves local progress while an old cloud record still needs deletion", async () => {
+test("restart clears cloud and local data after one confirmation", async () => {
   const page = homePageForSettings({
     localSession: { localId: "local-1", stage: "profile", answers: { q1: "a" } },
     cloudStatus: { connected: true, pending: false, warning: "" },
@@ -253,11 +280,40 @@ test("restart preserves local progress while an old cloud record still needs del
       expiresAt: "2099-01-01T00:00:00.000Z",
     },
     confirmModal: true,
+    deleteSucceeds: true,
+    connectSucceeds: true,
   });
   page.refresh();
   await page.start();
+  await page.waitForModal();
+  assert.equal(page.getDeleteCalls(), 1);
+  assert.equal(page.getClearCalls(), 1);
+  assert.equal(page.getStartCalls(), 1);
+  assert.equal(page.getConnectCalls(), 1);
+  assert.equal(page.getStopCalls(), 2);
+  assert.equal(page.getLocalSession().localId, "local-new-1");
+  assert.deepEqual(page.navigations, ["profile"]);
+});
+
+test("restart keeps local progress when cloud deletion is not confirmed", async () => {
+  const page = homePageForSettings({
+    localSession: { localId: "local-1", stage: "profile", answers: { q1: "a" } },
+    cloudStatus: { connected: true, pending: false, warning: "" },
+    cloudCurrent: {
+      sessionId: "ses_00000000000000000000000000000000",
+      deletionToken: "a".repeat(43),
+      progress: "created",
+      expiresAt: "2099-01-01T00:00:00.000Z",
+    },
+    confirmModal: true,
+    deleteSucceeds: false,
+  });
+  page.refresh();
+  await page.start();
+  await page.waitForModal();
+  assert.equal(page.getDeleteCalls(), 1);
+  assert.equal(page.getClearCalls(), 0);
   assert.equal(page.getStartCalls(), 0);
-  assert.equal(page.data.privacyVisible, true);
-  assert.equal(page.data.recordsVisible, true);
+  assert.equal(page.getLocalSession().localId, "local-1");
   assert.deepEqual(page.navigations, []);
 });

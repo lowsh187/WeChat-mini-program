@@ -101,30 +101,51 @@ Page({
       return;
     }
     wx.showModal({
-      title: "重新开始？",
-      content: "这会覆盖设备上的现有答题进度。",
+      title: "重新开始并清除数据？",
+      content: "选择“清除并重新开始”后，将默认删除本机进度和本次云端探索记录。此操作不可撤销。",
+      confirmText: "清除并重新开始",
+      confirmColor: "#b33a32",
       success: async (result) => {
-        if (result.confirm) {
-          const cloudStatus = cloudSession.status();
-          if (wx.cloud && (cloudStatus.connected || cloudStatus.pending || !!cloudStatus.warning)) {
-            this.setData({
-              cloudMessage: userMessage(
-                cloudStatus.connected
-                  ? "请先在隐私与数据管理中删除旧的云端记录，再重新开始。"
-                  : cloudStatus.warning || "上次连接结果尚未确认，请先处理当前连接状态再重新开始。",
-              ),
-              privacyVisible: true,
-              recordsVisible: cloudStatus.connected,
-              analyticsDetailsVisible: false,
-              feedbackVisible: false,
-            });
-            this.refresh();
-            return;
-          }
-          sessionStore.start();
-          if (!(await this.ensureCloudSession())) return;
-          navigate(routes.profile);
+        if (!result.confirm || this.data.cloudBusy || this.data.feedbackBusy) return;
+        const cloudStatus = cloudSession.status();
+        if (!cloudStatus.connected && (cloudStatus.pending || !!cloudStatus.warning)) {
+          this.setData({
+            cloudMessage: userMessage(
+              cloudStatus.warning ||
+                "上次连接结果尚未确认，暂不能安全删除云端数据，请稍后重试或联系团队。",
+            ),
+            privacyVisible: true,
+            recordsVisible: false,
+            analyticsDetailsVisible: false,
+            feedbackVisible: false,
+          });
+          this.refresh();
+          return;
         }
+        if (cloudStatus.connected) {
+          this.setData({ cloudBusy: true, cloudMessage: "正在删除云端探索记录…" });
+          telemetry.stop();
+          try {
+            const removal = await cloudSession.removeWithResult();
+            this.setData({ cloudMessage: userMessage(removal.message), analyticsConsent: false });
+            if (!removal.removed) {
+              this.refresh();
+              return;
+            }
+          } finally {
+            this.setData({ cloudBusy: false });
+          }
+        }
+        const cleared = sessionStore.clear();
+        if (!cleared) {
+          this.refresh();
+          wx.showToast({ title: "本机记录清除失败，请重试", icon: "none" });
+          return;
+        }
+        telemetry.stop();
+        sessionStore.start();
+        if (!(await this.ensureCloudSession())) return;
+        navigate(routes.profile);
       },
     });
   },

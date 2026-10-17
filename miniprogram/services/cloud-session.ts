@@ -9,6 +9,10 @@ interface Link {
   session: CloudSession | null;
   pending: boolean;
 }
+export interface CloudRemovalResult {
+  removed: boolean;
+  message: string;
+}
 let link: Link | null = null;
 let loaded = false;
 let warning = "";
@@ -36,6 +40,37 @@ function read() {
 function save() {
   wx.setStorageSync(KEY, link);
   warning = "";
+}
+async function removeCloudSession(): Promise<CloudRemovalResult> {
+  const current = read();
+  if (!current?.session)
+    return {
+      removed: false,
+      message: "没有可用删除凭据。若创建曾超时，请联系 B 查询，不能宣称云端已删除。",
+    };
+  const response = await cloudAdapter.deleteSession(
+    current.session.sessionId,
+    current.session.deletionToken,
+  );
+  if (response.status !== "success" || !response.data.accepted)
+    return {
+      removed: false,
+      message: response.message || "云端未明确确认删除成功，保留凭据供重试。",
+    };
+  try {
+    wx.removeStorageSync(KEY);
+    link = null;
+    warning = "";
+  } catch {
+    return {
+      removed: false,
+      message: "云端已确认删除，但本地凭据清理失败，请联系团队清理残留。",
+    };
+  }
+  return {
+    removed: true,
+    message: "云端已确认删除成功。你仍可单独清除本地进度。",
+  };
 }
 export const cloudSession = {
   status() {
@@ -97,23 +132,10 @@ export const cloudSession = {
       return "凭据保存失败，请勿退出；可先尝试删除云端记录。";
     }
   },
+  removeWithResult() {
+    return removeCloudSession();
+  },
   async remove() {
-    const current = read();
-    if (!current?.session)
-      return "没有可用删除凭据。若创建曾超时，请联系 B 查询，不能宣称云端已删除。";
-    const response = await cloudAdapter.deleteSession(
-      current.session.sessionId,
-      current.session.deletionToken,
-    );
-    if (response.status !== "success" || !response.data.accepted)
-      return response.message || "云端未明确确认删除成功，保留凭据供重试。";
-    try {
-      wx.removeStorageSync(KEY);
-      link = null;
-      warning = "";
-    } catch {
-      return "云端已确认删除，但本地凭据清理失败，请联系团队清理残留。";
-    }
-    return "云端已确认删除成功。你仍可单独清除本地进度。";
+    return (await removeCloudSession()).message;
   },
 };

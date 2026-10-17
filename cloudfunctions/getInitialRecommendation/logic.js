@@ -9,6 +9,23 @@ const DIMENSIONS = [
   "creative_ideation",
 ];
 const PREFERENCES = ["facts", "people", "practice", "unsure"];
+// selectFollowup serves these fixed questions from code rather than base_questions.
+// Keep this allow-list covered by a cross-function contract test so valid answers
+// are not rejected when the database intentionally contains only base questions.
+const FOLLOWUP_QUESTION_IDS = [
+  "followup_information_01",
+  "followup_information_02",
+  "followup_logic_01",
+  "followup_logic_02",
+  "followup_user_01",
+  "followup_user_02",
+  "followup_communication_01",
+  "followup_communication_02",
+  "followup_execution_01",
+  "followup_execution_02",
+  "followup_creative_01",
+  "followup_creative_02",
+];
 const PREFERENCE_MATRIX = {
   facts: {
     data_analyst: 5,
@@ -73,11 +90,12 @@ function validateInput(input, questions) {
   )
     return { ok: false, error: "初步推荐请求格式不正确。" };
   const base = questions.filter(({ questionType }) => questionType === "base");
-  const followups = new Set(
-    questions
+  const followups = new Set([
+    ...FOLLOWUP_QUESTION_IDS,
+    ...questions
       .filter(({ questionType }) => questionType === "followup")
       .map(({ questionId }) => questionId),
-  );
+  ]);
   if (
     Object.keys(input.baseAnswers).length !== base.length ||
     Object.keys(input.baseAnswers).some(
@@ -267,6 +285,7 @@ async function runProvider(provider, prompt) {
 }
 
 module.exports = {
+  FOLLOWUP_QUESTION_IDS,
   CONFIG_VERSION,
   CONTRACT_VERSION,
   PREFERENCE_MATRIX,

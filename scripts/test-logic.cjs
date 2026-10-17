@@ -1271,6 +1271,75 @@ async function main() {
     },
   );
   await check(
+    "restart confirms once, preserves local data on cloud failure and then clears both",
+    async () => {
+      const { cloudSession } = load("services/cloud-session");
+      const { cloudAdapter } = load("services/cloud-adapter");
+      const originalCloud = wxMock.cloud;
+      const originalModal = wxMock.showModal;
+      const originalCreate = cloudAdapter.createSession;
+      const originalDelete = cloudAdapter.deleteSession;
+      let modal;
+      let creates = 0;
+      let deletes = 0;
+      try {
+        sessionStore.clear();
+        const originalLocalId = sessionStore.start().localId;
+        wxMock.cloud = {};
+        wxMock.showModal = (options) => {
+          modal = options;
+        };
+        cloudAdapter.createSession = async (saved) => {
+          creates++;
+          const created = {
+            ...credentials,
+            sessionId: `ses_${String(creates).repeat(32)}`,
+            expiresAt: new Date(Date.now() + 86400000).toISOString(),
+          };
+          saved(created);
+          return envelope(created);
+        };
+        await cloudSession.connect();
+        const home = mountPage("pages/home/index");
+        home.onShow();
+        cloudAdapter.deleteSession = async () => {
+          deletes++;
+          return { status: "error", data: null, message: "模拟云端删除失败" };
+        };
+        await home.start();
+        assert.match(modal.content, /本机进度和本次云端探索记录/);
+        await modal.success({ confirm: true });
+        assert.equal(sessionStore.snapshot().session.localId, originalLocalId);
+        assert.equal(cloudSession.status().connected, true);
+        assert.equal(deletes, 1);
+
+        cloudAdapter.deleteSession = async () => {
+          deletes++;
+          return { status: "success", data: { accepted: true }, message: "" };
+        };
+        await home.start();
+        await modal.success({ confirm: true });
+        assert.notEqual(sessionStore.snapshot().session.localId, originalLocalId);
+        assert.equal(deletes, 2);
+        assert.equal(creates, 2);
+        assert.equal(cloudSession.status().linked, true);
+        assert.equal(navigations.at(-1)[1].url, "/pages/profile/profile");
+      } finally {
+        cloudAdapter.deleteSession = async () => ({
+          status: "success",
+          data: { accepted: true },
+          message: "",
+        });
+        await cloudSession.remove();
+        sessionStore.clear();
+        wxMock.cloud = originalCloud;
+        wxMock.showModal = originalModal;
+        cloudAdapter.createSession = originalCreate;
+        cloudAdapter.deleteSession = originalDelete;
+      }
+    },
+  );
+  await check(
     "telemetry requires opt-in, sends minimal idempotent real events and stops on new session",
     async () => {
       const { cloudSession } = load("services/cloud-session");

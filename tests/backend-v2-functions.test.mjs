@@ -3,6 +3,7 @@ import test from "node:test";
 
 import initial from "../cloudfunctions/getInitialRecommendation/logic.js";
 import initialProvider from "../cloudfunctions/getInitialRecommendation/ai-provider.js";
+import followup from "../cloudfunctions/selectFollowup/logic.js";
 import trial from "../cloudfunctions/scoreTrial/logic.js";
 
 const dimensions = [
@@ -50,6 +51,27 @@ test("initial recommendation validates answers and keeps preference out of capab
     followupAnswers: {},
   };
   assert.equal(initial.validateInput(request, questions).ok, true);
+  assert.deepEqual(
+    initial.FOLLOWUP_QUESTION_IDS.slice().sort(),
+    followup.FOLLOWUP_QUESTIONS.map(({ questionId }) => questionId).sort(),
+  );
+  assert.equal(
+    initial.validateInput(
+      {
+        ...request,
+        followupAnswers: { [initial.FOLLOWUP_QUESTION_IDS[0]]: "我会先提取关键信息并核对限制。" },
+      },
+      questions,
+    ).ok,
+    true,
+  );
+  assert.equal(
+    initial.validateInput(
+      { ...request, followupAnswers: { followup_unknown: "普通回答" } },
+      questions,
+    ).ok,
+    false,
+  );
   assert.equal(
     initial.validateInput({ ...request, followupAnswers: { followup: "test@example.com" } }, [
       ...questions,
