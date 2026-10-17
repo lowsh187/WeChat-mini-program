@@ -111,6 +111,7 @@ function homePageForSettings(options = {}) {
   let deleteCalls = 0;
   let stopCalls = 0;
   let modalPromise = Promise.resolve();
+  const modalCalls = [];
   const navigations = [];
   let localSession = options.localSession || null;
   const dependencies = {
@@ -189,9 +190,13 @@ function homePageForSettings(options = {}) {
     },
     {
       cloud: {},
-      showModal: ({ success }) => {
+      showModal: (modal) => {
+        modalCalls.push(modal);
+        if (modal.showCancel === false || !modal.success) return;
         if (options.confirmModal)
-          modalPromise = Promise.resolve(success({ confirm: true, cancel: false }));
+          modalPromise = Promise.resolve(modal.success({ confirm: true, cancel: false }));
+        else if (options.cancelModal)
+          modalPromise = Promise.resolve(modal.success({ confirm: false, cancel: true }));
       },
       showToast() {},
     },
@@ -211,6 +216,7 @@ function homePageForSettings(options = {}) {
     getStopCalls: () => stopCalls,
     waitForModal: () => modalPromise,
     getLocalSession: () => localSession,
+    getModalCalls: () => modalCalls,
   };
 }
 
@@ -286,6 +292,8 @@ test("restart clears cloud and local data after one confirmation", async () => {
   page.refresh();
   await page.start();
   await page.waitForModal();
+  assert.equal(page.getModalCalls()[0].confirmText, "确定");
+  assert.equal(page.getModalCalls()[0].cancelText, "取消");
   assert.equal(page.getDeleteCalls(), 1);
   assert.equal(page.getClearCalls(), 1);
   assert.equal(page.getStartCalls(), 1);
@@ -293,6 +301,23 @@ test("restart clears cloud and local data after one confirmation", async () => {
   assert.equal(page.getStopCalls(), 2);
   assert.equal(page.getLocalSession().localId, "local-new-1");
   assert.deepEqual(page.navigations, ["profile"]);
+});
+
+test("restart cancellation explains that deletion is required", async () => {
+  const page = homePageForSettings({
+    localSession: { localId: "local-1", stage: "profile", answers: { q1: "a" } },
+    cloudStatus: { connected: false, pending: false, warning: "" },
+    cancelModal: true,
+  });
+  page.refresh();
+  await page.start();
+  await page.waitForModal();
+  assert.equal(page.getModalCalls().length, 2);
+  assert.equal(page.getModalCalls()[1].title, "无法重新开始");
+  assert.match(page.getModalCalls()[1].content, /需要删除本机和云端数据/);
+  assert.equal(page.getClearCalls(), 0);
+  assert.equal(page.getStartCalls(), 0);
+  assert.deepEqual(page.navigations, []);
 });
 
 test("restart keeps local progress when cloud deletion is not confirmed", async () => {

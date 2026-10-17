@@ -1307,7 +1307,14 @@ async function main() {
           return { status: "error", data: null, message: "模拟云端删除失败" };
         };
         await home.start();
-        assert.match(modal.content, /本机进度和本次云端探索记录/);
+        assert.match(modal.content, /全部本机进度和本次云端探索记录/);
+        assert.equal(modal.confirmText, "确定");
+        assert.equal(modal.cancelText, "取消");
+        await modal.success({ confirm: false, cancel: true });
+        assert.equal(modal.title, "无法重新开始");
+        assert.match(modal.content, /需要删除本机和云端数据/);
+        assert.equal(sessionStore.snapshot().session.localId, originalLocalId);
+        await home.start();
         await modal.success({ confirm: true });
         assert.equal(sessionStore.snapshot().session.localId, originalLocalId);
         assert.equal(cloudSession.status().connected, true);

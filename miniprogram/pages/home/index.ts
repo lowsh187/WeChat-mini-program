@@ -101,12 +101,22 @@ Page({
       return;
     }
     wx.showModal({
-      title: "重新开始并清除数据？",
-      content: "选择“清除并重新开始”后，将默认删除本机进度和本次云端探索记录。此操作不可撤销。",
-      confirmText: "清除并重新开始",
+      title: "删除所有数据？",
+      content: "是否删除全部本机进度和本次云端探索记录，并重新开始？此操作不可撤销。",
+      confirmText: "确定",
+      cancelText: "取消",
       confirmColor: "#b33a32",
       success: async (result) => {
-        if (!result.confirm || this.data.cloudBusy || this.data.feedbackBusy) return;
+        if (!result.confirm) {
+          wx.showModal({
+            title: "无法重新开始",
+            content: "需要删除本机和云端数据才能重新开始。",
+            showCancel: false,
+            confirmText: "知道了",
+          });
+          return;
+        }
+        if (this.data.cloudBusy || this.data.feedbackBusy) return;
         const cloudStatus = cloudSession.status();
         if (!cloudStatus.connected && (cloudStatus.pending || !!cloudStatus.warning)) {
           this.setData({
