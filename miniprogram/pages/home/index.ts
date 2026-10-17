@@ -96,32 +96,42 @@ Page({
     if (this.data.cloudBusy || this.data.feedbackBusy) return;
     if (!this.data.hasSession) {
       sessionStore.start();
-      if (wx.cloud && !cloudSession.current()) {
-        this.setData({ cloudBusy: true, cloudMessage: "正在连接探索服务…" });
-        const cloudMessage = await cloudSession.connect();
-        this.setData({ cloudBusy: false, cloudMessage });
-        if (!cloudSession.current()) {
-          this.refresh();
-          return;
-        }
-      }
+      if (!(await this.ensureCloudSession())) return;
       navigate(routes.profile);
       return;
     }
     wx.showModal({
       title: "重新开始？",
       content: "这会覆盖设备上的现有答题进度。",
-      success: (result) => {
+      success: async (result) => {
         if (result.confirm) {
+          const cloudStatus = cloudSession.status();
+          if (wx.cloud && (cloudStatus.connected || cloudStatus.pending || !!cloudStatus.warning)) {
+            this.setData({
+              cloudMessage: userMessage(
+                cloudStatus.connected
+                  ? "请先在隐私与数据管理中删除旧的云端记录，再重新开始。"
+                  : cloudStatus.warning || "上次连接结果尚未确认，请先处理当前连接状态再重新开始。",
+              ),
+              privacyVisible: true,
+              recordsVisible: cloudStatus.connected,
+              analyticsDetailsVisible: false,
+              feedbackVisible: false,
+            });
+            this.refresh();
+            return;
+          }
           sessionStore.start();
+          if (!(await this.ensureCloudSession())) return;
           navigate(routes.profile);
         }
       },
     });
   },
-  resume() {
+  async resume() {
     const session = sessionStore.snapshot().session;
     if (session) {
+      if (!(await this.ensureCloudSession())) return;
       if (session.actionPlan && session.trial?.completed) {
         navigate(routes.actionPlan);
         return;
@@ -140,6 +150,34 @@ Page({
               : routes.profile,
       );
     }
+  },
+  async ensureCloudSession(): Promise<boolean> {
+    if (!wx.cloud || cloudSession.current()) return true;
+    const status = cloudSession.status();
+    if (status.connected || status.pending || status.warning) {
+      this.setData({
+        cloudMessage: userMessage(
+          status.connected
+            ? "检测到旧的云端记录与当前进度不匹配或已经过期。请先在隐私与数据管理中请求删除云端记录，再重新开始。"
+            : status.warning || "上次连接结果尚未确认，请勿重复创建。请联系团队协助恢复。",
+        ),
+        privacyVisible: true,
+        recordsVisible: status.connected,
+        analyticsDetailsVisible: false,
+        feedbackVisible: false,
+      });
+      this.refresh();
+      return false;
+    }
+    this.setData({ cloudBusy: true, cloudMessage: "正在连接探索服务…" });
+    try {
+      const cloudMessage = await cloudSession.connect();
+      this.setData({ cloudMessage: userMessage(cloudMessage) });
+    } finally {
+      this.setData({ cloudBusy: false });
+      this.refresh();
+    }
+    return !!cloudSession.current();
   },
   preview() {
     navigate(`${routes.initialResult}?preview=1`);

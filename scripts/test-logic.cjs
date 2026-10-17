@@ -315,25 +315,28 @@ async function main() {
       assert.equal(profileCondition(emptyBranch, page.data), false);
     },
   );
-  await check("home start opens a ready profile and re-entering restores the question", () => {
-    sessionStore.clear();
-    pages = [];
-    const home = mountPage("pages/home/index");
-    home.onShow();
-    home.start();
-    assert.equal(navigations.at(-1)[1].url, "/pages/profile/profile");
-    const page = mountPage("pages/profile/profile");
-    page.onShow();
-    assert.equal(page.data.ready, true);
-    page.chooseAnswer({ currentTarget: { dataset: { option: "b" } } });
-    page.next();
-    const returned = mountPage("pages/profile/profile");
-    returned.onShow();
-    assert.equal(returned.data.ready, true);
-    assert.equal(returned.data.questionIndex, 1);
-    returned.previous();
-    assert.equal(returned.data.selectedOption, "b");
-  });
+  await check(
+    "home start opens a ready profile and re-entering restores the question",
+    async () => {
+      sessionStore.clear();
+      pages = [];
+      const home = mountPage("pages/home/index");
+      home.onShow();
+      await home.start();
+      assert.equal(navigations.at(-1)[1].url, "/pages/profile/profile");
+      const page = mountPage("pages/profile/profile");
+      page.onShow();
+      assert.equal(page.data.ready, true);
+      page.chooseAnswer({ currentTarget: { dataset: { option: "b" } } });
+      page.next();
+      const returned = mountPage("pages/profile/profile");
+      returned.onShow();
+      assert.equal(returned.data.ready, true);
+      assert.equal(returned.data.questionIndex, 1);
+      returned.previous();
+      assert.equal(returned.data.selectedOption, "b");
+    },
+  );
   await check(
     "profile start with wx storage failure still opens questions and renders a retry warning",
     () => {
@@ -1320,7 +1323,7 @@ async function main() {
     sessionStore.clear();
     const home = mountPage("pages/home/index");
     home.onShow();
-    home.start();
+    await home.start();
     assert.equal(navigations.at(-1)[1].url, "/pages/profile/profile");
     const profile = mountPage("pages/profile/profile");
     profile.onShow();
@@ -1370,7 +1373,7 @@ async function main() {
     assert.equal(plan.data.completedCount, 1);
     assert.equal(sessionStore.snapshot().session.stage, "action-plan");
     home.onShow();
-    home.resume();
+    await home.resume();
     assert.equal(navigations.at(-1)[1].url, "/pages/action-plan/action-plan");
     assert.equal(
       createSessionStore(load("utils/storage").localStorage).snapshot().session.actionPlan.view

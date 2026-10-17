@@ -96,21 +96,59 @@ test("every long-answer input retains its limit and binding with explicit keyboa
   }
 });
 
-function homePageForSettings() {
+function homePageForSettings(options = {}) {
   let definition;
   const sideEffect = () => assert.fail("Opening settings must not create, delete or opt in");
+  let cloudCurrent = options.cloudCurrent || null;
+  let connectCalls = 0;
+  let startCalls = 0;
+  const navigations = [];
+  const localSession = options.localSession || null;
+  const cloudStatus = options.cloudStatus || {
+    connected: false,
+    pending: true,
+    warning: "删除凭据无法读取，请联系 B",
+  };
   const dependencies = {
     "../../mocks/base-questions": { baseQuestions: Array(8).fill({}) },
     "../../utils/home-progress": { homeProgress },
     "../../store/session": {
-      sessionStore: { snapshot: () => ({ session: null, warning: "" }), clear: sideEffect },
+      sessionStore: {
+        snapshot: () => ({ session: localSession, warning: "" }),
+        start: () => {
+          startCalls += 1;
+        },
+        clear: sideEffect,
+      },
     },
     "../../services/cloud-session": {
       cloudSession: {
-        status: () => ({ connected: false, pending: true, warning: "删除凭据无法读取，请联系 B" }),
-        current: () => null,
-        connect: sideEffect,
+        status: () => cloudStatus,
+        current: () => cloudCurrent,
+        connect: async () => {
+          connectCalls += 1;
+          if (options.connectSucceeds)
+            cloudCurrent = {
+              sessionId: "ses_00000000000000000000000000000000",
+              deletionToken: "a".repeat(43),
+              progress: "created",
+              expiresAt: "2099-01-01T00:00:00.000Z",
+            };
+          return options.connectMessage || "服务连接已建立";
+        },
         remove: sideEffect,
+      },
+    },
+    "../../utils/navigation": {
+      navigate: (route) => navigations.push(route),
+      routes: {
+        home: "home",
+        profile: "profile",
+        followup: "followup",
+        initialResult: "initial-result",
+        workTrial: "work-trial",
+        trialResult: "trial-result",
+        actionPlan: "action-plan",
       },
     },
     "../../services/telemetry": {
@@ -129,7 +167,12 @@ function homePageForSettings() {
     (page) => {
       definition = page;
     },
-    { cloud: {} },
+    {
+      cloud: {},
+      showModal: ({ success }) => {
+        if (options.confirmModal) success({ confirm: true, cancel: false });
+      },
+    },
     {},
   );
   return {
@@ -138,6 +181,9 @@ function homePageForSettings() {
     setData(patch) {
       Object.assign(this.data, patch);
     },
+    navigations,
+    getConnectCalls: () => connectCalls,
+    getStartCalls: () => startCalls,
   };
 }
 
@@ -182,4 +228,36 @@ test("homepage recovery messages use plain language and retain pending state", (
   const entrance = markup.match(/<view class="utility-links">([\s\S]*?)<\/view>/)[1];
   assert.equal([...entrance.matchAll(/<button\b/g)].length, 1);
   assert.match(entrance, /bindtap="privacy"/);
+});
+
+test("resuming cached local progress reconnects before leaving the homepage", async () => {
+  const page = homePageForSettings({
+    localSession: { localId: "local-1", stage: "profile", answers: { q1: "a" } },
+    cloudStatus: { connected: false, pending: false, warning: "" },
+    connectSucceeds: true,
+  });
+  page.refresh();
+  await page.resume();
+  assert.equal(page.getConnectCalls(), 1);
+  assert.deepEqual(page.navigations, ["profile"]);
+});
+
+test("restart preserves local progress while an old cloud record still needs deletion", async () => {
+  const page = homePageForSettings({
+    localSession: { localId: "local-1", stage: "profile", answers: { q1: "a" } },
+    cloudStatus: { connected: true, pending: false, warning: "" },
+    cloudCurrent: {
+      sessionId: "ses_00000000000000000000000000000000",
+      deletionToken: "a".repeat(43),
+      progress: "created",
+      expiresAt: "2099-01-01T00:00:00.000Z",
+    },
+    confirmModal: true,
+  });
+  page.refresh();
+  await page.start();
+  assert.equal(page.getStartCalls(), 0);
+  assert.equal(page.data.privacyVisible, true);
+  assert.equal(page.data.recordsVisible, true);
+  assert.deepEqual(page.navigations, []);
 });
