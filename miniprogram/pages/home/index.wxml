@@ -1,50 +1,65 @@
-<view class="page">
-  <view class="eyebrow">{{title}}</view>
-  <view class="title"><view>先体验一份工作，</view><view>再探索你的方向。</view></view>
-  <view class="subtitle">{{subtitle}}</view>
-  <view class="notice">AI 辅助职业探索：画像与追问用于生成岗位方向，试岗回答用于形成行为证据和行动计划。结果仅供探索，不构成专业测评或就业结论。</view>
-  <view class="card">
-    <view class="card-title">今天，从 8 道情境题开始</view>
-    <view class="muted">没有标准答案，选择更接近你会采取的做法。进度保存在当前设备；生成结果时会将必要回答发送到云端处理。</view>
-    <button class="primary" bindtap="start">{{hasSession ? '重新开始' : '开始探索'}}</button>
-    <block wx:if="{{canContinue}}">
-      <view class="saved">已有进度：已答 {{answeredCount}} / {{total}} 题</view>
-      <button class="secondary" bindtap="resume">继续上次体验</button>
-    </block>
-    <button class="link-button" bindtap="preview">先看看推荐示例</button>
-  </view>
-  <view class="card">
-    <view class="card-title">正式产品的探索路径</view>
-    <view class="flow-item">01　基础画像 → 最多两轮动态追问</view>
-    <view class="flow-item">02　三个岗位方向 → 3～5 分钟试岗</view>
-    <view class="flow-item">03　行为证据与推荐变化 → 七天行动</view>
-    <button class="link-button" bindtap="showFollowup">查看动态追问</button>
-  </view>
-  <view wx:if="{{warning}}" class="error">{{warning}}</view>
-  <button wx:if="{{hasSession || warning}}" class="link-button" bindtap="clear">清除本地记录</button>
-  <view class="card">
-    <button class="link-button" bindtap="privacy">隐私与 AI 使用说明</button>
-    <view wx:if="{{privacyVisible}}" class="subtitle">不要求姓名、手机号或实名信息，请勿在回答中输入个人隐私。画像、回答和计划进度保存在本设备；生成推荐与试岗结果时，必要回答会发送到微信云开发中的服务端 AI 接口。反馈仅在你主动提交时发送；匿名步骤事件需单独开启，且不包含回答正文。你可以分别清除本地进度和请求删除云端会话关联记录。</view>
-    <button class="link-button" bindtap="feedback">反馈体验</button>
-    <view wx:if="{{feedbackVisible}}">
-      <view class="muted">帮助度 1～5（越大越有帮助），自愿提交。不要填写手机号、邮箱或他人隐私。</view>
-      <view class="scenario-buttons"><button data-value="1" bindtap="rate">1</button><button data-value="2" bindtap="rate">2</button><button data-value="3" bindtap="rate">3</button><button data-value="4" bindtap="rate">4</button><button data-value="5" bindtap="rate">5</button></view>
-      <view class="muted">当前选择：{{helpfulness || '未选择'}}</view>
-      <textarea class="answer" maxlength="480" value="{{feedbackText}}" bindinput="feedbackInput" placeholder="可选：这次体验帮助你澄清了什么？" />
-      <view class="muted">{{publicationConsentText}}</view><button class="secondary" bindtap="togglePublicationConsent" disabled="{{feedbackBusy}}">{{publicationConsent ? '已选择同意公开文字反馈 · 点击取消' : '未同意公开使用（默认）· 自愿选择'}}</button><view class="muted">授权文案版本：{{publicationTextVersion}}。授权状态会与反馈一并保存。</view>
-      <button class="secondary" bindtap="sendFeedback" loading="{{feedbackBusy}}" disabled="{{feedbackBusy || feedbackSent || feedbackUncertain || cloudBusy}}">{{feedbackSent ? '已确认接收反馈' : feedbackUncertain ? '结果待核实，请勿重复发送' : '主动提交到云端'}}</button>
-      <view class="notice">{{feedbackMessage || '只有云端明确确认后才会显示接收成功。'}}</view>
+<view class="page home">
+  <view class="eyebrow">PathAI 职业试岗舱</view>
+  <view class="title">先体验一份工作，<view>再探索你的方向。</view></view>
+  <view class="subtitle">用一次小任务，认识工作，也认识自己。</view>
+  <view class="card exploration">
+    <view class="card-title">{{progressTitle}}</view>
+    <view class="subtitle">{{progressDetail}}</view>
+    <view class="journey">
+      <view wx:for="{{progressSteps}}" wx:key="label" class="journey-step {{item.current ? 'current' : ''}} {{item.complete ? 'complete' : ''}}">
+        <view class="step-mark">{{item.complete ? '✓' : index + 1}}</view><view>{{item.label}}</view>
+      </view>
     </view>
+    <button wx:if="{{canContinue}}" class="primary" bindtap="resume" disabled="{{cloudBusy || feedbackBusy}}">{{continueLabel}}</button>
+    <button wx:else class="primary" bindtap="start" loading="{{cloudBusy}}" disabled="{{cloudBusy || feedbackBusy}}">开始探索</button>
+    <view class="muted data-note">进度保存在本设备；生成结果时，必要回答会发送到云端处理。请勿输入个人隐私。</view>
+    <button wx:if="{{hasSession}}" class="link-button" bindtap="start" disabled="{{cloudBusy || feedbackBusy}}">重新开始</button>
+    <button wx:else class="link-button" bindtap="preview">看看推荐示例</button>
   </view>
-  <view class="card">
-    <view class="card-title">云端匿名会话</view>
-    <view class="muted">{{cloudConnected ? '已有云端凭据。' : cloudPending ? '此前创建结果待确认，请勿重复创建。' : '尚未连接。开始探索时会自动创建。'}}{{cloudConnected ? cloudLinked ? '' : '凭据属于另一体验，请先删除云端记录。' : ''}}</view>
-    <button class="secondary" bindtap="connectCloud" loading="{{cloudBusy}}" disabled="{{cloudBusy || cloudConnected || cloudPending}}">创建匿名云端会话</button>
-    <button wx:if="{{cloudConnected}}" class="secondary" bindtap="deleteCloud" disabled="{{cloudBusy || feedbackBusy}}">请求删除云端记录</button>
-    <button wx:if="{{cloudWarning}}" class="secondary" bindtap="saveCloudCredential">重试保存删除凭据</button>
-    <view wx:if="{{cloudMessage || cloudWarning}}" class="notice">{{cloudMessage}} {{cloudWarning}}</view>
-    <button class="link-button" bindtap="analytics" disabled="{{cloudBusy}}">{{analyticsConsent ? '关闭匿名步骤事件' : '同意记录匿名流程步骤'}}</button><view class="muted">事件使用唯一 eventId 去重，仅包含流程步骤和结果状态，不包含画像或回答正文。</view>
+  <view class="muted ai-note">AI 辅助探索，结果仅供参考，不构成专业测评或就业结论。示例结果会单独标注。</view>
+  <view wx:if="{{warning}}" class="error">{{warning}}</view>
+  <view wx:if="{{cloudNeedsAttention || cloudPending || cloudWarning || cloudMessage}}" class="notice">
+    <view wx:if="{{cloudBusy}}">正在连接，请稍候…</view>
+    <view wx:elif="{{cloudPending}}">上次连接结果尚未确认，请勿重复操作。请联系团队协助恢复。</view>
+    <view wx:elif="{{cloudNeedsAttention}}">暂时无法生成云端结果，本地进度仍保留。{{cloudConnected ? '请在隐私与数据管理中查看处理方式；如需保留云端记录，请联系团队协助。' : '可以重试连接。'}}</view>
+    <view wx:if="{{cloudMessage || cloudWarning}}">{{cloudMessage}} {{cloudWarning}}</view>
+    <button wx:if="{{cloudNeedsAttention && canRetryConnection}}" class="secondary" bindtap="connectCloud" loading="{{cloudBusy}}" disabled="{{cloudBusy || feedbackBusy}}">重试连接</button>
+    <button wx:if="{{cloudWarning}}" class="secondary" bindtap="saveCloudCredential" disabled="{{cloudBusy || feedbackBusy}}">重试保存</button>
+    <button wx:if="{{cloudConnected && cloudNeedsAttention && !privacyVisible}}" class="link-button" bindtap="privacy">查看数据管理</button>
+  </view>
+  <view class="utility-links">
+    <button class="link-button" bindtap="privacy">{{privacyVisible ? '收起隐私与数据管理' : '隐私与数据管理'}}</button>
+  </view>
+  <view wx:if="{{privacyVisible}}" class="card settings">
+    <view class="card-title">隐私与 AI 使用说明</view>
+    <view class="muted">无需填写姓名或手机号。进度保存在本设备，生成推荐和试岗结果时，必要回答会发送到服务端 AI 处理。请勿输入个人隐私；反馈仅在主动提交时发送。</view>
+    <button class="link-button settings-toggle" bindtap="toggleAnalyticsDetails">匿名使用统计 · {{analyticsDetailsVisible ? '收起' : '展开'}}</button>
+    <block wx:if="{{analyticsDetailsVisible}}">
+    <view class="muted">自愿记录探索步骤和结果状态，帮助改进体验，不包含画像或回答正文。关闭不会删除已上传记录。</view>
+    <button class="secondary" bindtap="analytics" disabled="{{cloudBusy}}">{{analyticsConsent ? '关闭匿名步骤记录' : '同意记录匿名流程步骤'}}</button>
     <view wx:if="{{analyticsMessage}}" class="muted">{{analyticsMessage}}</view>
+    </block>
+    <button class="link-button settings-toggle" bindtap="toggleRecords">删除探索记录 · {{recordsVisible ? '收起' : '展开'}}</button>
+    <block wx:if="{{recordsVisible}}">
+    <view class="muted">本地进度和云端记录需分别删除。删除云端记录后，后续生成结果可能需要重新建立连接；如需保留记录，请先联系团队协助。</view>
+    <button wx:if="{{hasSession || warning}}" class="secondary" bindtap="clear" disabled="{{cloudBusy || feedbackBusy}}">删除本设备记录</button>
+    <button wx:if="{{cloudConnected}}" class="secondary" bindtap="deleteCloud" disabled="{{cloudBusy || feedbackBusy}}">请求删除云端记录</button>
+    <view class="muted">删除前会再次确认，云端删除以服务器确认结果为准。</view>
+    </block>
+    <button class="link-button settings-toggle" bindtap="feedback">意见反馈 · {{feedbackVisible ? '收起' : '展开'}}</button>
   </view>
-  <view class="muted footer">PathAI 帮助你探索方向，不替你作出职业决定。</view>
+  <view wx:if="{{privacyVisible && feedbackVisible}}" class="card feedback">
+    <view class="card-title">这次探索对你有帮助吗？</view>
+    <view class="muted">自愿反馈，1 表示帮助较少，5 表示帮助较大。</view>
+    <view class="scenario-buttons"><button data-value="1" bindtap="rate">1</button><button data-value="2" bindtap="rate">2</button><button data-value="3" bindtap="rate">3</button><button data-value="4" bindtap="rate">4</button><button data-value="5" bindtap="rate">5</button></view>
+    <view class="muted">当前选择：{{helpfulness || '未选择'}}</view>
+    <textarea class="answer" maxlength="480" value="{{feedbackText}}" bindinput="feedbackInput" cursor-spacing="24" adjust-position="{{true}}" show-confirm-bar="{{true}}" placeholder="可选：一句感受或建议。请勿填写联系方式。" />
+    <view class="muted input-meta">可选 · {{feedbackText.length}} / 480，上限不是最低要求</view>
+    <view class="muted">{{publicationConsentText}}</view>
+    <button class="secondary" bindtap="togglePublicationConsent" disabled="{{feedbackBusy}}">{{publicationConsent ? '已同意公开文字反馈 · 点击取消' : '未同意公开使用 · 自愿选择'}}</button>
+    <button class="primary" bindtap="sendFeedback" loading="{{feedbackBusy}}" disabled="{{feedbackBusy || feedbackSent || feedbackUncertain || cloudBusy}}">{{feedbackSent ? '已收到反馈' : feedbackUncertain ? '结果待核实，请勿重复发送' : '提交反馈'}}</button>
+    <view wx:if="{{feedbackMessage}}" class="notice">{{feedbackMessage}}</view>
+    <view wx:if="{{!cloudConnected && hasSession && canRetryConnection}}" class="muted">反馈需要连接服务。<button class="link-button" bindtap="connectCloud" disabled="{{cloudBusy}}">重试连接</button></view>
+  </view>
+  <view class="muted footer">探索方向，不替你作决定。</view>
 </view>

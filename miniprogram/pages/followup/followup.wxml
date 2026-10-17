@@ -13,8 +13,9 @@
       <view wx:if="{{message}}" class="notice">{{message}}</view>
       <view class="badge">预设维度：{{question.dimensionLabel}} · 非评分</view>
       <view class="card-title">{{question.title}}</view><view class="subtitle">{{question.prompt}}</view>
-      <textarea class="answer" value="{{answer}}" maxlength="800" disabled="{{submitting}}" bindinput="input" placeholder="写下你的做法或一个小例子（最多 800 字）" />
-      <view class="muted">{{answer.length}} / 800 · 本地草稿自动保存</view>
+      <view class="input-guide">简短说清做法即可，不要求长篇回答。可以按“我会先…，因为…”组织自己的想法。</view>
+      <textarea class="answer" value="{{answer}}" maxlength="800" disabled="{{submitting}}" bindinput="input" cursor-spacing="24" adjust-position="{{true}}" show-confirm-bar="{{true}}" placeholder="写下你的做法，或一个真实的小例子" />
+      <view class="muted input-meta">必填 · {{answer.length}} / 800，上限不是最低要求 · 草稿保存在本设备</view>
       <button class="primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">提交本轮回答</button>
       <button wx:if="{{round > 0}}" class="secondary" bindtap="previous">返回上一轮</button>
       <button wx:if="{{canNextSaved}}" class="secondary" bindtap="nextSaved">查看已保存的下一轮</button>
